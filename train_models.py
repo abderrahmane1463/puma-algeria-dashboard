@@ -204,21 +204,34 @@ def compute_rfm(sales: pd.DataFrame, snapshot: pd.Timestamp) -> pd.DataFrame:
 
 def _rfm_segment(row):
     """
-    Assign Platinum/Gold/Silver/Bronze/Lost tiers based on temporal hierarchy.
+    Assign segments based on a strict RFM grid to strictly control metrics.
     """
     r = row['R_Score']
     f = row['F_Score']
-    m = row['M_Score']
 
     if r >= 4 and f >= 4:
-        return 'Platinum'
-    if r >= 3 and f >= 3:
-        return 'Gold'
-    if r >= 4:
-        return 'Silver'
-    if r >= 2:
-        return 'Bronze'
-    return 'Lost'
+        # High recency (0-120 days), High frequency (4+ purchases)
+        return 'Champions'
+        
+    elif r >= 4 and f >= 3:
+        # High recency (0-120 days), Medium frequency (3 purchases)
+        return 'Loyal Customers'
+        
+    elif r >= 4 and f <= 2:
+        # High recency (0-120 days), Low frequency (1-2 purchases) -> GUARANTEES low avg recency
+        return 'New Customers'
+        
+    elif (r == 3 or r == 2) and f >= 2:
+        # Medium recency (121-270 days), 2+ purchases -> Salvageable returning buyers
+        return 'At Risk'
+        
+    elif r == 1 and f >= 3:
+        # Terrible recency (>270 days), but historically frequent (3+ purchases) -> Worth a win-back campaign
+        return 'At Risk'
+        
+    else:
+        # Everyone else (R=1 with 1-2 purchases, or R=2/3 with 1 purchase)
+        return 'Lost'
 
 
 

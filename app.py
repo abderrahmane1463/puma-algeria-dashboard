@@ -202,7 +202,7 @@ def load_artifacts(bust_cache=False):
 
 # ── Check artifacts ──────────────────────────────────────────────────────────
 # Set bust_cache=True (or any new unique value) if you just updated the data pipeline
-artifacts, missing_files = load_artifacts(bust_cache="Refresh_v10_CLV_OrderLevelFIX")
+artifacts, missing_files = load_artifacts(bust_cache="Refresh_v14_RebalanceLost")
 
 if artifacts is None:
     st.error(f"Artifacts not found: {', '.join(missing_files)}.\n\n"

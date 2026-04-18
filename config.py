@@ -62,17 +62,17 @@ COLS_TO_DROP = [
 
 # ══ Segment palettes (single definition) ══════════════════════════════════════
 SEGMENT_COLORS_5 = {
-    'Platinum': '#2ecc71',
-    'Gold'    : '#3498db',
-    'Silver'  : '#f1c40f',
-    'Bronze'  : '#e67e22',
-    'Lost'    : '#e74c3c',
+    'Champions'       : '#2ecc71',
+    'Loyal Customers' : '#3498db',
+    'New Customers'   : '#f1c40f',
+    'At Risk'         : '#e67e22',
+    'Lost'            : '#e74c3c',
 }
 KMEANS_COLORS = {
-    'Platinum': '#2ecc71',
-    'Gold'    : '#3498db',
-    'Silver'  : '#f1c40f',
-    'Bronze'  : '#e67e22',
+    'Champions': '#2ecc71',
+    'Promising': '#3498db',
+    'At Risk'  : '#e67e22',
+    'Dormant'  : '#e74c3c',
 }
 TIER_COLORS = {
     'High CLV'  : '#2ecc71',
@@ -86,13 +86,13 @@ MODEL_COLORS = {
 }
 
 # ══ Segment orders (for consistent axis ordering) ═════════════════════════════
-SEG_ORDER_5     = ['Platinum', 'Gold', 'Silver', 'Bronze', 'Lost']
-SEG_ORDER_KM    = ['Platinum', 'Gold', 'Silver', 'Bronze']
+SEG_ORDER_5     = ['Champions', 'Loyal Customers', 'New Customers', 'At Risk', 'Lost']
+SEG_ORDER_KM    = ['Champions', 'Promising', 'At Risk', 'Dormant']
 TIER_ORDER      = ['High CLV', 'Medium CLV', 'Low CLV']
 MODEL_ORDER     = ['SARIMA', 'Prophet', 'XGBoost']
 
 # ══ K-Means segment names (ranked by mean RFM_Score descending) ═══════════════
-KMEANS_SEGMENT_NAMES = ['Platinum', 'Gold', 'Silver', 'Bronze']
+KMEANS_SEGMENT_NAMES = ['Champions', 'Promising', 'At Risk', 'Dormant']
 
 
 # ══ XGBoost feature columns ═══════════════════════════════════════════════════

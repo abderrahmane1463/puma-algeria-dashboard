@@ -3,15 +3,15 @@
   "davies_bouldin": 0.9545,
   "k": 4,
   "segment_names": [
-    "Platinum",
-    "Gold",
-    "Silver",
-    "Bronze"
+    "Champions",
+    "Promising",
+    "At Risk",
+    "Dormant"
   ],
   "cluster_to_segment": {
-    "3": "Platinum",
-    "1": "Gold",
-    "0": "Silver",
-    "2": "Bronze"
+    "3": "Champions",
+    "1": "Promising",
+    "0": "At Risk",
+    "2": "Dormant"
   }
 }
