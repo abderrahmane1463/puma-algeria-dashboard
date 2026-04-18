@@ -1,0 +1,8 @@
+p = open('app.py', 'r', encoding='utf-8')
+t = p.read()
+p.close()
+before = t.count("width='stretch'")
+t = t.replace("width='stretch'", "use_container_width=True")
+after = t.count("width='stretch'")
+open('app.py', 'w', encoding='utf-8').write(t)
+print(f'Fixed {before} occurrences -> {after} remaining')

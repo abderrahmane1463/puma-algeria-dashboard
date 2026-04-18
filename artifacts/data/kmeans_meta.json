@@ -1,0 +1,17 @@
+{
+  "silhouette": 0.3986,
+  "davies_bouldin": 0.9545,
+  "k": 4,
+  "segment_names": [
+    "Platinum",
+    "Gold",
+    "Silver",
+    "Bronze"
+  ],
+  "cluster_to_segment": {
+    "3": "Platinum",
+    "1": "Gold",
+    "0": "Silver",
+    "2": "Bronze"
+  }
+}
