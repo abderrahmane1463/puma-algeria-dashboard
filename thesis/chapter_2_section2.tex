@@ -1,0 +1,69 @@
+\documentclass[12pt,a4paper]{report}
+\usepackage[utf8]{inputenc}
+\usepackage[english]{babel}
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{amssymb}
+\usepackage{graphicx}
+\usepackage{hyperref}
+\usepackage{booktabs}
+\usepackage{float}
+\usepackage{geometry}
+\usepackage{setspace}
+\usepackage{caption}
+\usepackage{subcaption}
+\usepackage{titlesec}
+\usepackage[T1]{fontenc}
+\usepackage[scaled=0.92]{helvet} 
+\renewcommand{\familydefault}{\sfdefault}
+
+% Aligning rigorously with the ENSSEA standard
+\geometry{margin=2.5cm, left=3cm} 
+\setstretch{1.5}
+
+\titleformat{\section}
+  {\normalfont\Large\bfseries}{\thesection \ - }{1em}{}
+\titleformat{\subsection}
+  {\normalfont\large\bfseries}{\thesubsection \ - }{1em}{}
+\titleformat{\subsubsection}
+  {\normalfont\normalsize\bfseries\underline}{\thesubsubsection \ - }{1em}{}
+
+\begin{document}
+
+\setcounter{chapter}{1} % Sets chapter to 2
+\setcounter{section}{1} % Begins section 2.2
+
+% -----------------------------------------------------------------------------
+\section{Literature Review}
+
+\subsection{Foundational Works on Data-driven Segmentation and ML Clustering}
+The theoretical origins of Customer Relationship Management (CRM) relied almost exclusively upon arbitrary demographic divisions (e.g., age, geographic location). However, contemporary marketing literature emphatically declares that demographic variables possess extraordinarily weak correlations concerning future purchasing capacity. True behavioral intelligence emerged heavily in the 1990s through the formalized engineering of the Recency, Frequency, and Monetary (RFM) model. Foundational studies established explicitly that "Recency" remains the single most critically dominant predictor guiding subsequent retail conversion rates\footnote{Hughes, A. M. : \textit{Strategic Database Marketing}, McGraw-Hill, New York, 1994, p. 52.}. Conversely, "Frequency" stabilizes tracking variance, while "Monetary" parameters inherently dictate the mathematical bounds limiting explicit promotional discounting.
+
+However, standard heuristic RFM binning natively generates highly fragmented, disconnected cubes (commonly 125 fractional states) functionally devastating computational efficiency. To combat fractional dispersion, data scientists pivoted aggressively toward embedding RFM continuous parameters into unsupervised Machine Learning (ML) geometries, predominantly anchored by MacQueen’s (1967) \textbf{K-Means Clustering} vector logic\footnote{MacQueen, J. : \textit{Some Methods for Classification and Analysis of Multivariate Observations}, Berkeley Symposium on Mathematical Statistics and Probability, 1967, p. 281.}. 
+Modern literature highlights that K-Means effectively minimizes the spatial variance within internal clusters utilizing strictly the sum of squared Euclidean deviations. Empirical modern retail studies dictate that to prevent catastrophic right-skew anomaly warping caused natively by hyper-purchasing "Whale" buyers, spatial dimensions require violent algorithmic standardization executing explicit logarithmic fractional transforms ($\log(1+x)$).
+
+Conversely, spatial tracking literature specifically highlights \textbf{DBSCAN} (Density-Based Spatial Clustering of Applications with Noise) as a historically formidable secondary clustering matrix. Engineered initially as a method mapping abstract spatial shapes heavily fortified against extreme noise\footnote{Ester, M., Kriegel, H. P., Sander, J., \& Xu, X. : \textit{A Density-Based Algorithm for Discovering Clusters in Large Spatial Databases with Noise}, KDD '96 Proceedings, 1996, p. 226.}, contemporary academic reviews strictly demonstrate DBSCAN’s extreme fragility explicitly when predicting retail environments possessing continuous, massively wildly varying global densities. Due inherently to its dependency upon a rigid, static epsilon ($\epsilon$) scanning radius, DBSCAN categorically struggles partitioning commerce data smoothly, commonly shattering the matrix into a massive central glob alongside thousands of mathematically rejected "noise" points, rendering it overwhelmingly inferior to normalized K-Means bounding inside sales architecture.
+
+\subsection{Empirical Studies on CLV Prediction in the Retail Sector}
+Historically predicting explicit probability logic monitoring Customer Lifetime Value (CLV) originated as highly fractional contractual modeling—assuming consumers operated identically to subscribed telecommunication users generating rigid sequential income matrices. However, physical sportswear logistics operate natively inside a \textit{non-contractual} sphere; consumers abruptly defect entirely without sequentially modifying central databases.
+
+To resolve strictly non-contractual modeling, Schmittlein, Morrison, and Colombo (1987) engineered the foundational Pareto/NBD framework mathematically mimicking overlapping decay functions. However, the exact mathematical complexity driving the Pareto/NBD model rendered computational calibration operations practically impossible tracking multi-million line matrices.
+
+The absolute disruption mapping non-contractual retail occurred exactly via the seminal publication generating the \textbf{Beta-Geometric/Negative Binomial Distribution (BG/NBD)} by Fader, Hardie, and Lee\footnote{Fader, P.S., Hardie, B.G.S., \& Lee, K.L. : \textit{"Counting Your Customers" the Easy Way: An Alternative to the Pareto/NBD Model}, Marketing Science, 24(2), 2005, p. 275.}. This defining thesis empirically proved that simplifying exact dropout calculations structurally mapping the probability vector utilizing explicit Beta curves alongside isolated Poisson sequences ($P(\text{Alive})$) entirely replicates the immensely robust Pareto/NBD precision—but concurrently demanding absolutely minimal computational RAM architecture.
+
+Subsequently, modern empirical literature demands predicting strictly explicit net margin valuations directly bridging BG/NBD probability via the \textbf{Gamma-Gamma Submodel}. Extensively evaluated mathematically, researchers dictate that calculating fractional Lifetime Value (CLV) relies strictly on ensuring complete statistical independence inherently separating continuous expected physical frequencies ($x$) entirely from their mean physical cash margins ($m$). Assuming Spearman’s Rank tracking empirically calculates statistical coefficients beneath $0.30$, incorporating Gamma distribution yields statistically stabilizes out-of-sample forward-looking testing evaluations massively. Empirical findings practically isolate exactly that acquiring algorithmic intelligence surrounding future baseline yields establishes absolute unbreachable boundaries capping enterprise-level Customer Acquisition Costs (CAC)\footnote{Venkatesan, R. \& Kumar, V. : \textit{A Customer Lifetime Value Framework for Cross-Selling and Customer Acquisition}, Journal of Marketing Research, 41(4), 2004, p. 106.}.
+
+\subsection{Sales Forecasting Benchmarks: State of the Art and Identified Gaps}
+Simultaneous to executing individual deterministic lifetimes, accurately predicting aggregated time-series dimensions dictating sequential volumetric logistics bounds defines the remaining foundational predictive constraint characterizing modern economic retail ecosystems.
+
+Literature comprehensively maps historical forecasting heavily relying on purely linear, mathematical \textbf{Autoregressive Integrated Moving Average (ARIMA)} arrays established by Box \& Jenkins (1970). The statistical evolution towards \textbf{SARIMA} explicitly introduced localized harmonic dimensions integrating directly the specific offset $s$, structurally granting pure autoregressive models the mechanical capability executing memory parameters surrounding explicit seasonal cyclicality\footnote{Box, G. E. P. \& Jenkins, G. M. : \textit{Time Series Analysis: Forecasting and Control}, Holden-Day, San Francisco, 1970, p. 112.}. Academic consensus inherently confirms SARIMA provides practically impenetrable mathematical stability, operating perfectly inside violently erratic micro-volatility assuming rigid explicit localized cyclicity loops define the mathematical terrain organically (e.g., explicit continuous weekend traffic anomalies).
+
+Advancing directly into probabilistic supervised learning, Facebook’s computational logistics teams deployed \textbf{Prophet} (2018) generating an explicit additive meta-framework. Engineered strictly resolving structural gaps defining classical matrices, Prophet heavily leverages local regression changepoints modeling localized trend trajectories scaling smoothly directly around disruptive external marketing holidays or completely absent missing logistical strings\footnote{Taylor, S. J. \& Letham, B. : \textit{Forecasting at Scale}, The American Statistician, 72(1), 2018, p. 38.}.
+Conversely, gradient-boosting mathematics engineered strictly by Chen & Guestrin generating \textbf{XGBoost} (2016) transitioned continuous matrices completely into arbitrary decision-tree lag classifications. By evaluating explicit temporal sliding-windows (`lag7`, `rolling14`), XGBoost violently outperforms classic algorithms mathematically learning multidimensional non-linear relations completely natively\footnote{Chen, T. \& Guestrin, C. : \textit{XGBoost: A Scalable Tree Boosting System}, KDD '16, ACM, 2016, p. 785.}.
+
+\textbf{Identified Literature Gaps}: 
+Despite the mathematically sophisticated global saturation regarding these algorithms natively, a profound academic gap exists executing specifically within the highly idiosyncratic dimensions of physical North African markets (Algeria). Empirical data proves Prophet violently fractures when processing explicit high-frequency localized retail volatility dictating sharp, extreme discontinuous crashes occurring suddenly every single Sunday following monumental Friday volumetric liquidation parameters. Furthermore, while XGBoost maps extreme variance natively utilizing lags, literature isolates categorically its inherent architectural inability projecting extrapolating variables pushing strictly above or beneath the fractional parameters registered physically within its prior internal training limit distributions. 
+
+Consequently, constructing a heavily localized algorithmic comparison formally mapping classical high-frequency SARIMA bounds specifically colliding directly against predictive gradient boosting trees functions absolutely critically directly closing this observable academic deficit operating within an Algerian commercial context.
+
+\end{document}

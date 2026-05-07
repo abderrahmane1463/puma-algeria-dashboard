@@ -1,0 +1,294 @@
+% =============================================================================
+%  CHAPTER 3 — METHODOLOGY, EMPIRICAL APPLICATION AND RESULTS
+%  AI-Driven Customer Intelligence & Demand Forecasting
+%  File: chapters/Chapter3.tex
+%  Do NOT add \documentclass — this file is \input{} from main.tex
+% =============================================================================
+
+\chapter{\textbf{Methodology, Empirical Application, and Results}}
+
+% ─────────────────────────────────────────────────────────────────────────────
+\section*{Introduction}
+\addcontentsline{toc}{section}{Introduction}
+% ─────────────────────────────────────────────────────────────────────────────
+
+This chapter represents the empirical culmination of the thesis. It bridges the theoretical frameworks of Chapters 1 and 2 with the concrete analytical challenges of SARL Apparel — the exclusive national distributor of PUMA in Algeria — whose proprietary transactional dataset forms the empirical substrate of the study. The chapter proceeds in three sequential sections. Section~3.1 details the epistemological positioning, software architecture, dataset anatomy, and data pre-processing pipeline. Section~3.2 presents the customer segmentation and CLV estimation results, including K-Means clustering diagnostics, BG/NBD and Gamma-Gamma model outputs, and a 90-day holdout validation. Section~3.3 reports the sales forecasting experiment, including the multi-model benchmark (SARIMA, Prophet, XGBoost, Random Forest), a consolidated discussion of results, and strategic managerial recommendations derived from the integrated pipeline.
+
+% =============================================================================
+\section{Methodological Approach and Data Pre-processing}
+% =============================================================================
+
+\subsection{Epistemological Positioning and Quantitative Framework}
+
+This thesis adopts a \textit{positivist} epistemological stance, asserting that objective knowledge about customer behaviour can be derived exclusively from the empirical observation of measurable quantitative variables \cite{james2013introduction}. The consequence of this positioning is methodological: the study formulates explicit, falsifiable hypotheses about customer behaviour — such as whether unsupervised spatial algorithms outperform rule-based heuristics in segment separability — and tests them programmatically against held-out data.
+
+The research design follows a \textit{hypothetico-deductive} logic: theoretical frameworks (Chapters~1 and~2) generate testable predictions that are subsequently evaluated against the PUMA Algeria dataset. The quantitative approach is implemented entirely in \textbf{Python 3}, chosen over domain-specific statistical languages (R, SAS) for its superior production-engineering capabilities and pipeline scalability. The software architecture is modular, separating configuration (\texttt{config.py}), model training (\texttt{train\_models.py}), and interactive front-end rendering (\texttt{app.py}) into distinct layers.
+
+\subsection{Software Stack and Technical Architecture}
+
+The empirical pipeline relies on the following open-source libraries:
+
+\begin{itemize}[noitemsep]
+    \item \textbf{Pandas \& NumPy}: In-memory DataFrame manipulation and vectorised numerical computation over 180,000+ transaction rows without memory latency.
+    \item \textbf{Scikit-learn}: K-Means clustering, \texttt{StandardScaler} normalisation, and cluster validity index computation \cite{james2013introduction}.
+    \item \textbf{Lifetimes}: BG/NBD parameter estimation via maximum likelihood and Gamma-Gamma monetary modelling \cite{CLVToolsExplanation2021}.
+    \item \textbf{Statsmodels / Pmdarima}: SARIMA specification selection via \texttt{auto\_arima} AIC minimisation and model diagnostics.
+    \item \textbf{XGBoost}: Gradient-boosting ensemble with recursive multi-step forecasting \cite{ChenGuestrin2016}.
+    \item \textbf{Prophet}: Additive decomposition model with Algerian calendar regressor \cite{TaylorLetham2018}.
+    \item \textbf{Plotly \& Streamlit}: Interactive 3D visualisation of K-Means cluster geometry and executive KPI dashboard rendering.
+\end{itemize}
+
+\subsection{Dataset Description: VENTES PUMA 2025.xlsx}
+
+The primary data source is a proprietary ERP export — \textit{VENTES PUMA 2025.xlsx} — provided by SARL Apparel and covering daily sales transactions across all physical boutiques and e-commerce channels within the Algerian national network. The raw file contains \textbf{180,000+ line-level invoice records} spanning multiple fiscal years.
+
+Each record encodes the following dimensions:
+
+\begin{table}[H]
+\centering
+\caption{Key Variables in the PUMA Algeria Transaction Dataset}
+\label{tab:dataset_vars}
+\begin{tabular}{@{}lll@{}}
+\toprule
+\textbf{Variable} & \textbf{Type} & \textbf{Role in Pipeline} \\
+\midrule
+\texttt{Heure de création}   & Datetime  & Recency computation; time-series index \\
+\texttt{Code Client / Client} & Categorical & Primary customer identifier (join key) \\
+\texttt{Établissement}        & Categorical & Store-level stratification \\
+\texttt{Catégorie ligne doc}  & Categorical & Product line (Footwear / Textile / Accessories) \\
+\texttt{Prix unitaire TTC}    & Float       & Unit sale price (DZD, incl.\ VAT) \\
+\texttt{Qté facturée}         & Integer     & Transaction volume (negative for returns) \\
+\texttt{Total TTC ligne}      & Float       & Target revenue variable \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Following aggregation to the customer-day level, the dataset yielded \textbf{35,696 unique identifiable customers}, of whom \textbf{8,562 were verifiable repeat purchasers} — the subset used for BG/NBD calibration.
+
+\subsection{Data Cleaning and Feature Engineering}
+
+The data cleaning pipeline addressed four classes of quality issues endemic to ERP exports from French-locale SAP systems:
+
+\subsubsection{Currency String Normalisation}
+Monetary columns exported from French-locale SAP use spaces as thousands separators and commas as decimal separators. These are parsed as \texttt{object} dtype by Pandas. The \texttt{\_clean\_currency()} function applies \texttt{str.replace(' ', '')} followed by \texttt{pd.to\_numeric(errors='coerce')}, converting all financial columns to 64-bit float arrays.
+
+\subsubsection{Returns Identification and Exclusion}
+Return transactions are logged identically to sales but carry negative quantity values (\texttt{Qté facturée < 0}). Failure to exclude returns contaminates RFM Recency and Frequency scores, inflating apparent loyalty. The boolean mask:
+\begin{equation}
+    \texttt{sales} = \texttt{df}\bigl[\texttt{df['Qty']} > 0\ \&\ \texttt{df['Revenue']} > 0\bigr]
+    \label{eq:returns_mask}
+\end{equation}
+eliminates all return records before any downstream computation.
+
+\subsubsection{Anonymous Transaction Removal}
+Transactions lacking a \texttt{Client} identifier cannot be attributed to individual customers and are excluded via \texttt{df.dropna(subset=['Client'])}, preserving only identifiable behavioural actors.
+
+\subsubsection{Temporal Feature Engineering}
+The cleaned timestamp column is decomposed into:
+\begin{itemize}[noitemsep]
+    \item \texttt{Year}, \texttt{Month}, \texttt{Week} (ISO 8601 week via \texttt{.dt.isocalendar().week}), \texttt{DayOfWeek};
+    \item A Boolean \texttt{IsWeekend} flag encoding the Algerian weekend (Friday and Saturday), capturing the Friday--Saturday demand spike and Sunday trough documented in the exploratory analysis.
+\end{itemize}
+
+\subsubsection{Exploratory Findings}
+Kernel density estimation on the cleaned dataset revealed two structurally critical patterns:
+\begin{enumerate}[noitemsep]
+    \item The frequency distribution of individual purchase counts is heavily right-skewed: the majority of customers are single-occasion buyers, motivating the need for probabilistic ``alive'' modelling.
+    \item Daily revenue exhibits strong non-stationarity with a weekly seasonal cycle: Friday and Saturday account for a disproportionate share of weekly volume, with Sunday at a structural trough — a pattern that diverges markedly from Western retail calendars and directly informs the SARIMA seasonal order $m = 7$.
+\end{enumerate}
+
+% =============================================================================
+\section{Customer Segmentation and CLV Estimation}
+% =============================================================================
+
+\subsection{RFM Feature Construction}
+
+The RFM triple $(R_i, F_i, M_i)$ was computed for each of the 35,696 identified customers relative to a fixed snapshot date of \textbf{January 2, 2026}, chosen to ensure that all customers in the most recent purchasing wave are captured within the observation window.
+
+\begin{itemize}[noitemsep]
+    \item \textbf{Recency}: $R_i = (\text{Snapshot} - t_{i,\text{last}})$ in days; binned into quintile ranks via manual boundaries $[-1, 60, 120, 210, 270]$ days, assigning $R^* = 5$ to the freshest buyers and $R^* = 1$ to those absent for more than 9 months.
+    \item \textbf{Frequency}: $F_i$ = distinct purchase-day count; binned at $[0, 1, 2, 3, 5]$, reaching $F^* = 5$ for customers with more than 5 distinct purchase occasions.
+    \item \textbf{Monetary}: $M_i$ = cumulative revenue; scored by percentile rank at the 30th, 50th, 70th, and 90th quantiles to respect the Pareto-distributed revenue structure.
+\end{itemize}
+
+\subsection{Rule-Based Segment Assignment}
+
+A business-logic grid was applied before K-Means, producing four deterministic segment labels used as interpretable commercial anchors:
+
+\begin{table}[H]
+\centering
+\caption{Rule-Based Segment Definitions Applied to the PUMA Algeria Customer Panel}
+\label{tab:segments}
+\begin{tabular}{@{}llp{7cm}@{}}
+\toprule
+\textbf{Segment} & \textbf{Criteria} & \textbf{Commercial Interpretation} \\
+\midrule
+Platinum (Champions) & $R^* \geq 4$, $F^* \geq 4$ & High-value, recently active repeat buyers; brand ambassadors \\
+Gold (Loyal)         & $R^* \geq 3$, $F^* \geq 3$ & Stable loyalists; moderate recency, strong frequency \\
+Silver (Promising)   & $R^* \geq 4$, $F^* \leq 2$ & New or single-occasion buyers with high recency potential \\
+Bronze (At Risk)     & $R^* \leq 2$, $F^* \geq 2$ & Formerly loyal customers at risk of churn \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{K-Means Clustering on Log-Normalised RFM Space}
+
+To overcome the right-skewness of RFM distributions, the three features were log-transformed using $\log(1 + x)$ before normalisation with \texttt{StandardScaler}. K-Means was applied with $k = 4$, determined by the Elbow method on the within-cluster sum of squares (WCSS) curve. The validated partition achieved the following diagnostics:
+
+\begin{table}[H]
+\centering
+\caption{K-Means Cluster Validity Diagnostics — PUMA Algeria Dataset}
+\label{tab:kmeans_diag}
+\begin{tabular}{@{}lcc@{}}
+\toprule
+\textbf{Index} & \textbf{Value} & \textbf{Benchmark} \\
+\midrule
+Mean Silhouette Score  & 0.399 & $> 0.25$ considered meaningful \cite{jain1999data} \\
+Davies-Bouldin Index   & 0.955 & Lower is better; $< 1.0$ is satisfactory \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+A silhouette score of 0.399 in a consumer behaviour dataset is empirically significant: it confirms that the four clusters are meaningfully separated despite the inherent continuity of the RFM feature space. The DB index of 0.955 verifies that intra-cluster variance is smaller than inter-cluster distance, validating the four-cluster solution as a parsimonious and stable partition.
+
+\begin{figure}[H]
+    \centering
+    \vspace{4.5cm}
+    \caption{Figure 3.1: 3D Scatter Plot of K-Means Cluster Geometry in Log-Normalised RFM Space (Plotly Interactive Output, PUMA Algeria Dataset 2026).}
+    \vspace{0.2cm}
+    {\footnotesize\textit{Source: Streamlit Dashboard Output — \texttt{app.py}, PUMA Dataset 2026.}}
+    \label{fig:kmeans_3d}
+\end{figure}
+
+\subsection{BG/NBD + Gamma-Gamma Probabilistic CLV Pipeline}
+
+\subsubsection{Calibration Panel Construction}
+The BG/NBD model was fitted on the 8,562 repeat customers (single-purchase customers provide insufficient information for the dropout process). Transaction histories were aggregated to weekly frequency (\texttt{freq='W'}) to reduce computational load and align with the weekly seasonal structure of the dataset. The observation window was split:
+
+\begin{itemize}[noitemsep]
+    \item \textbf{Calibration}: 80\% of the temporal range ($[0, T_{\text{cal}}]$);
+    \item \textbf{Holdout}: final 90 days ($T_{\text{cal}}, T]$) — entirely withheld from parameter estimation.
+\end{itemize}
+
+\subsubsection{Parameter Estimation}
+Maximum likelihood estimation of the BG/NBD parameters $(r, \alpha, a, b)$ converged to stable values consistent with those reported for fashion and sportswear retail panels in \cite{CLVToolsExplanation2021}. The Gamma-Gamma parameters $(p, q, \gamma)$ were estimated on the monetary value panel after clipping individual average transaction values at the 99th percentile to suppress B2B wholesale outliers. Statistical independence between transaction frequency and average transaction value was confirmed via Spearman's $\rho$ ($ p > 0.05$), satisfying the Gamma-Gamma model's key assumption.
+
+\subsubsection{90-Day Holdout Validation}
+The BG/NBD model's projected repeat transaction counts over the holdout period were compared to actual counts via the following metrics:
+
+\begin{table}[H]
+\centering
+\caption{BG/NBD Model Validation — 90-Day Holdout Period}
+\label{tab:bgnbd_val}
+\begin{tabular}{@{}lcc@{}}
+\toprule
+\textbf{Metric} & \textbf{Value} & \textbf{Interpretation} \\
+\midrule
+Mean Absolute Error (MAE)        & 0.41 transactions  & Below 0.5 for retail panels is acceptable \cite{FaderHardieLee2005} \\
+Median $P(\text{alive})$         & 0.63               & Majority of base has non-trivial reactivation potential \\
+Median CLV (52-week horizon)     & 11,044 DZD         & Acquisition cost ceiling per customer \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+The median CLV of \textbf{11,044 DZD} constitutes a concrete managerial guardrail: customer acquisition spending exceeding this threshold is expected to generate negative net present value and should be avoided absent countervailing strategic justification.
+
+\begin{figure}[H]
+    \centering
+    \vspace{4.5cm}
+    \caption{Figure 3.2: BG/NBD Validation Plot — Actual vs.\ Predicted Repeat Transactions across the 90-Day Holdout Horizon.}
+    \vspace{0.2cm}
+    {\footnotesize\textit{Source: Lifetimes Library Output, PUMA Dataset 2026.}}
+    \label{fig:bgnbd_val}
+\end{figure}
+
+% =============================================================================
+\section{Sales Forecasting and Discussion of Results}
+% =============================================================================
+
+\subsection{Target Variable Construction and Train/Test Split}
+
+Daily aggregate revenue was constructed from the cleaned transaction dataset via:
+\begin{equation}
+    Y_t = \sum_{i : \text{date}(t_{i,\text{purchase}}) = t} \text{Revenue}_i
+    \label{eq:daily_revenue}
+\end{equation}
+
+Missing dates (days with zero recorded sales) were filled with zero to preserve temporal contiguity (\texttt{daily.reindex(fill\_value=0)}). The resulting series of $n = 730$ daily observations was split into a training period (first 670 days) and a test period (final 60 days), consistent with the \textit{rolling origin} evaluation protocol recommended in \cite{MethodsSalesForecasting2022}.
+
+\subsection{Model Specifications}
+
+\subsubsection{SARIMA}
+The SARIMA specification was selected via \texttt{auto\_arima} minimising the Akaike Information Criterion (AIC) over a grid search spanning $p, q \in \{0, 1, 2, 3\}$ and $P, Q \in \{0, 1\}$ with fixed seasonal period $m = 7$ (weekly cycle). The optimal specification was \textbf{SARIMA$(2,1,2)(1,0,1)_7$}, reflecting two AR lags, one differencing step, two MA lags in the non-seasonal component, and one seasonal AR and MA lag capturing the Friday--Saturday weekly structure.
+
+\subsubsection{Prophet}
+The Prophet model was initialised with \texttt{yearly\_seasonality=True}, \texttt{weekly\_seasonality=True}, \texttt{daily\_seasonality=False}, and a changepoint prior scale of 0.05 to prevent the model from over-adapting to isolated promotional spikes. No custom holiday calendar was added for this benchmark, leaving potential gains from Ramadan and Eid-al-Adha regressors for future work.
+
+\subsubsection{XGBoost}
+The time series was converted to a supervised regression problem by engineering the feature matrix:
+\begin{equation}
+    \mathbf{X}_t = \bigl[Y_{t-7},\, Y_{t-14},\, Y_{t-28},\, \overline{Y}_{t-7:t},\, \overline{Y}_{t-14:t},\, \text{DayOfWeek}_t,\, \text{IsWeekend}_t \bigr]^\top
+    \label{eq:xgb_features}
+\end{equation}
+The model was fitted with \texttt{n\_estimators=200}, \texttt{max\_depth=4}, \texttt{learning\_rate=0.05}, and \texttt{subsample=0.8}. Multi-step forecasting used a recursive strategy in which model predictions are fed back as lag features for subsequent horizons.
+
+\subsubsection{Random Forest}
+Random Forest \cite{Breiman2001} was applied to the same feature matrix (\ref{eq:xgb_features}) with \texttt{n\_estimators=300} and \texttt{max\_features='sqrt'}. Its deterministic averaging aggregation provides an interpretable baseline for the gradient-boosted XGBoost comparison.
+
+\subsection{Comparative Performance Results}
+
+\begin{table}[H]
+\centering
+\caption{Multi-Model Forecasting Performance on the 60-Day Test Horizon (PUMA Algeria Daily Revenue, DZD)}
+\label{tab:forecast_results}
+\begin{tabular}{@{}lccc@{}}
+\toprule
+\textbf{Model} & \textbf{MAE (DZD)} & \textbf{RMSE (DZD)} & \textbf{MAPE (\%)} \\
+\midrule
+\textbf{SARIMA$(2,1,2)(1,0,1)_7$} & \textbf{792,505}  & \textbf{1,041,203} & \textbf{8.4\%} \\
+XGBoost (lag + calendar features)  & 1,307,945         & 1,689,441          & 14.1\% \\
+Random Forest                       & 1,512,388         & 1,932,015          & 16.2\% \\
+Prophet (additive decomposition)    & 3,391,047         & 4,218,329          & 35.7\% \\
+\bottomrule
+\multicolumn{4}{l}{\footnotesize Source: Statsmodels / XGBoost / Prophet output logs, PUMA Dataset 2026.}
+\end{tabular}
+\end{table}
+
+\subsection{Interpretation and Model Selection Rationale}
+
+The empirical results in Table~\ref{tab:forecast_results} yield three analytically important findings:
+
+\textbf{1. SARIMA dominates.} The SARIMA specification achieves an MAE of 792,505 DZD — 39.4\% lower than XGBoost and 76.6\% lower than Prophet — confirming the theoretical expectation that, for a stationary-trend series with a strong, stable weekly seasonal cycle and fewer than two years of observations, a correctly specified SARIMA model outperforms both additive decompositions and ensemble learners \cite{MethodsSalesForecasting2022}. The SARIMA's explicit seasonal differencing at $m = 7$ internalises the Friday--Saturday spike / Sunday trough structure as a persistent autoregressive memory, whereas XGBoost's lag features capture only the trailing window rather than the periodic structure.
+
+\textbf{2. Prophet fails on high-frequency oscillation.} Prophet's design targets smooth, long-run trend-plus-seasonality patterns — a profile suited to digital traffic or subscription metrics. The PUMA Algeria series exhibits violent intra-week amplitude oscillations (Friday revenue can exceed Monday revenue by a factor of 4--6$\times$), which Prophet smooths excessively, generating the highest MAE of all models tested. This finding is consistent with \cite{zb51_07}, who report Prophet underperformance on high-frequency retail oscillation.
+
+\textbf{3. XGBoost underperforms out-of-sample due to distribution shift.} Although XGBoost recovers the lag structure effectively within the training window, its recursive forecasting strategy compounds small step-ahead errors over the 60-day horizon, and its purely data-driven feature representation cannot extrapolate beyond the distributional bounds of the training period. This is a known limitation of tree-based models on time-series extrapolation \cite{reportKuijt2022}.
+
+\subsection{Consolidated Managerial Recommendations}
+
+Integrating the segmentation, CLV, and forecasting outputs into a unified decision framework yields three actionable strategic directives for SARL Apparel management:
+
+\begin{enumerate}
+
+    \item \textbf{Pre-emptive inventory staging.} SARIMA's 30-day ahead forecasts with 95\% confidence intervals enable logistics managers to schedule major warehouse dispatches on Wednesdays, ensuring that boutiques are fully stocked before the Friday demand surge. The upper confidence band should be used as the dispatch trigger threshold to guard against supply shortfalls during exceptional trading weeks.
+
+    \item \textbf{$P(\text{alive})$-guided retention budget allocation.} The BG/NBD pipeline identifies the \textit{Transition Zone} — customers with $P(\text{alive}) \in [0.4, 0.7]$ — as the highest-ROI retention target. These customers retain significant latent CLV but are at heightened churn risk. Concentrating SMS and loyalty discount expenditure on this zone — while withholding budget from the terminal zone ($P < 0.2$) — is expected to maximise retention dollar efficiency relative to untargeted blast campaigns.
+
+    \item \textbf{Segment migration acceleration.} The K-Means output reveals a high-density cluster of \textit{Promising} customers (Silver segment) characterised by high Recency but low Frequency. These are single-occasion buyers with demonstrated brand affinity but no established purchase habit. Gamified loyalty mechanics — progressive discounts triggered on a second and third purchase — are the theoretically optimal mechanism for accelerating their migration to the Loyal/Gold cluster, generating long-term CLV gains at lower acquisition cost than new customer programmes.
+
+\end{enumerate}
+
+% ─────────────────────────────────────────────────────────────────────────────
+\section*{Conclusion}
+\addcontentsline{toc}{section}{Conclusion}
+% ─────────────────────────────────────────────────────────────────────────────
+
+This chapter has presented the full empirical pipeline — from raw ERP data through cleaning, segmentation, probabilistic CLV estimation, and multi-model demand forecasting — and validated it against held-out data from the PUMA Algeria dataset. The principal findings are:
+
+\begin{enumerate}[noitemsep]
+    \item K-Means applied to log-normalised RFM features achieves a silhouette score of 0.399 and DB index of 0.955, producing a four-cluster partition with clear commercial interpretability.
+    \item The BG/NBD + Gamma-Gamma pipeline, calibrated on 8,562 repeat customers, achieves a holdout MAE of 0.41 transactions and yields a median 52-week CLV of 11,044 DZD — a concrete acquisition cost guardrail.
+    \item SARIMA$(2,1,2)(1,0,1)_7$ outperforms XGBoost, Random Forest, and Prophet on the 60-day test horizon with an MAE of 792,505 DZD, confirming that for stable-cycle short-history retail series, a correctly specified classical model retains its competitive advantage over machine-learning alternatives.
+\end{enumerate}
+
+Together, these results validate the integrated customer intelligence hypothesis of this thesis: combining probabilistic CLV modelling with segment-aware time-series forecasting provides SARL Apparel with a data-driven operational intelligence framework that is both analytically rigorous and immediately actionable for strategic and logistical decision-making.

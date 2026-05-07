@@ -1,0 +1,180 @@
+% =============================================================================
+%  CHAPTER 1 — THEORETICAL FOUNDATIONS
+%  AI-Driven Customer Intelligence & Demand Forecasting
+%  File: chapters/chapter1.tex
+%  Do NOT add \documentclass — this file is \input{} from main.tex
+% =============================================================================
+
+\chapter{\textbf{Theoretical Foundations of AI-Driven Retail Analytics}}
+
+% ─────────────────────────────────────────────────────────────────────────────
+\section*{Introduction}
+\addcontentsline{toc}{section}{Introduction}
+% ─────────────────────────────────────────────────────────────────────────────
+
+The modern retail enterprise operates within an environment of accelerating data complexity. Consumer transactions, loyalty interactions, inventory movements, and channel-switching behaviours collectively generate multi-dimensional datasets whose analytical exploitation requires a rigorous theoretical grounding in artificial intelligence, machine learning, and quantitative forecasting. This chapter provides the conceptual scaffolding upon which the empirical work of subsequent chapters rests. It proceeds in three principal sections: Section~1 surveys the conceptual architecture of artificial intelligence and its specialised branches — machine learning, deep learning, and probabilistic inference — relevant to retail analytics. Section~2 establishes the theoretical basis of customer segmentation, with particular emphasis on the Recency-Frequency-Monetary (RFM) framework and unsupervised clustering algorithms. Section~3 formalises the theory of Customer Lifetime Value (CLV) and its probabilistic models. Together, these sections provide the academic foundation for the integrated customer intelligence pipeline developed and evaluated in Chapters 2 and 3.
+
+% =============================================================================
+\section{Artificial Intelligence and Machine Learning: A Conceptual Framework}
+% =============================================================================
+
+\subsection{Definition of Artificial Intelligence}
+
+Artificial intelligence (AI) designates the broad scientific and engineering discipline concerned with the design of computational systems capable of performing tasks that, when performed by a human agent, are considered to require intelligence \cite{RussellNorvig2020}. This characterisation — deliberately broad by design — encompasses a spectrum of capabilities including perception, natural language understanding, logical reasoning, autonomous decision-making, and pattern recognition from data.
+
+The historical trajectory of AI research is marked by successive waves of theoretical ambition and empirical constraint. The foundational Turing-era conception of AI as a universal symbol-manipulation engine gave way in the 1980s to expert systems grounded in hand-coded domain knowledge \cite{Luger2009}. The limitations of hand-crafted knowledge bases — their brittleness, their inability to generalise beyond their design domain, and the prohibitive cost of their maintenance — motivated the contemporary shift toward \textit{data-driven} AI, in which intelligent behaviour is \textit{learned} from observations rather than \textit{prescribed} by rules.
+
+\subsection{Machine Learning: Taxonomy and Core Concepts}
+
+Machine learning (ML) constitutes the central sub-discipline of modern AI, concerned with the construction of algorithms that improve their performance on a task through experience \cite{Mitchell1997}. The canonical taxonomy distinguishes three learning paradigms:
+
+\begin{itemize}[noitemsep]
+    \item \textbf{Supervised learning}: the algorithm learns a mapping $f: \mathcal{X} \rightarrow \mathcal{Y}$ from labelled training pairs $\{(\mathbf{x}_i, y_i)\}_{i=1}^n$. Classification (discrete $\mathcal{Y}$) and regression (continuous $\mathcal{Y}$) are its two manifestations. Demand forecasting with historical sales labels is a canonical supervised regression problem.
+
+    \item \textbf{Unsupervised learning}: the algorithm identifies latent structure in unlabelled data $\{\mathbf{x}_i\}_{i=1}^n$. Clustering — partitioning observations into groups of similar instances — is the primary application in customer segmentation.
+
+    \item \textbf{Reinforcement learning}: the algorithm learns an action policy by interacting with an environment and receiving scalar reward signals \cite{suttonbarto2018}. While less central to this thesis, reinforcement learning underlies dynamic pricing and personalised recommendation systems.
+\end{itemize}
+
+The generalisation capacity of a machine learning model — its ability to perform well on unseen data — depends fundamentally on the bias-variance tradeoff \cite{Goodfellow2016}. High-bias models (e.g., linear regression) underfit complex data structures; high-variance models (e.g., unpruned decision trees) overfit training noise. Regularisation, cross-validation, and ensemble methods are the principal tools for navigating this tradeoff in retail analytics applications.
+
+\subsection{Key Algorithms Relevant to Retail Analytics}
+
+\subsubsection{The K-Means Clustering Algorithm}
+
+K-Means \cite{jain1999data} partitions a dataset $\{\mathbf{x}_i\}_{i=1}^n \subset \mathbb{R}^d$ into $k$ clusters $\mathcal{C}_1, \ldots, \mathcal{C}_k$ by minimising the within-cluster sum of squared Euclidean distances:
+
+\begin{equation}
+    \min_{\mathcal{C}_1,\ldots,\mathcal{C}_k} \sum_{j=1}^k \sum_{\mathbf{x}_i \in \mathcal{C}_j} \left\|\mathbf{x}_i - \boldsymbol{\mu}_j\right\|^2
+    \label{eq:kmeans_objective}
+\end{equation}
+
+where $\boldsymbol{\mu}_j = \frac{1}{|\mathcal{C}_j|} \sum_{\mathbf{x}_i \in \mathcal{C}_j} \mathbf{x}_i$ is the centroid of cluster $j$. The algorithm alternates between assignment (each point is assigned to the nearest centroid) and update (centroids are recomputed from the assigned points) until convergence. Its linear time complexity and straightforward geometric interpretation make it the dominant algorithm in practitioner-facing customer segmentation applications.
+
+\subsubsection{DBSCAN: Density-Based Clustering}
+
+DBSCAN (Density-Based Spatial Clustering of Applications with Noise) \cite{ester1996density} identifies clusters as dense regions of the feature space separated by sparse regions. Unlike K-Means, it requires no a priori specification of $k$ and natively identifies outliers as noise points, a property particularly valuable for retail data containing fraudulent transactions or data-entry anomalies.
+
+\subsubsection{Gradient Boosted Tree Ensembles}
+
+The gradient boosting framework \cite{Goodfellow2016} constructs an additive ensemble of weak learners (typically decision trees) by iteratively fitting each new tree to the negative gradient of the loss function evaluated at the current ensemble prediction. XGBoost \cite{ChenGuestrin2016} — the dominant implementation — augments the base framework with $\ell_1$/$\ell_2$ regularisation on leaf weights, column and row subsampling inspired by Random Forests \cite{Breiman2001}, and an efficient sparse-aware algorithm for handling missing values. These properties render XGBoost state-of-the-art for tabular demand forecasting.
+
+\subsubsection{Long Short-Term Memory Networks}
+
+LSTM networks \cite{Hochreiter1997} are a specialised form of recurrent neural network designed to capture long-range temporal dependencies through a gating architecture comprising three learned gates — input ($\mathbf{i}_t$), forget ($\mathbf{f}_t$), and output ($\mathbf{o}_t$) — that control the flow of information through a persistent cell state $\mathbf{c}_t$:
+
+\begin{align}
+    \mathbf{f}_t &= \sigma(W_f [\mathbf{h}_{t-1}, \mathbf{x}_t] + b_f) \notag \\
+    \mathbf{i}_t &= \sigma(W_i [\mathbf{h}_{t-1}, \mathbf{x}_t] + b_i) \notag \\
+    \mathbf{c}_t &= \mathbf{f}_t \odot \mathbf{c}_{t-1} + \mathbf{i}_t \odot \tanh(W_c [\mathbf{h}_{t-1}, \mathbf{x}_t] + b_c)
+    \label{eq:lstm}
+\end{align}
+
+where $\sigma(\cdot)$ is the sigmoid function, $\odot$ element-wise multiplication, and $\mathbf{h}_t = \mathbf{o}_t \odot \tanh(\mathbf{c}_t)$ the hidden state passed to the next step \cite{goodfellow_bengio_courville_2016}.
+
+% =============================================================================
+\section{Customer Segmentation: Theoretical Basis}
+% =============================================================================
+
+\subsection{The Imperative of Market Heterogeneity}
+
+The fundamental premise of customer segmentation is that market populations are \textit{heterogeneous}: individuals differ systematically in their preferences, purchasing capacities, price sensitivities, and brand loyalties. A marketing strategy calibrated to the average customer is suboptimal for all segments simultaneously — it over-invests in low-value segments and under-invests in high-value ones. Segmentation resolves this inefficiency by identifying groups within which a homogenised strategy is sufficiently accurate, allowing differentiated strategies across groups \cite{james2013introduction}.
+
+\subsection{The RFM Framework}
+
+The Recency-Frequency-Monetary (RFM) framework operationalises customer behavioural segmentation through three scalar metrics computed from a transactional history dataset up to a reference date $T$:
+
+\begin{itemize}[noitemsep]
+    \item $R_i = T - t_{i,\text{last}}$: the number of time units elapsed since customer $i$'s most recent purchase;
+    \item $F_i$: the total count of distinct purchase occasions within the observation window $[0, T]$;
+    \item $M_i$: the total expenditure (or, alternatively, the average transaction value) within $[0, T]$.
+\end{itemize}
+
+The predictive power of RFM rests on a well-documented empirical regularity: recent, frequent, and high-spending customers are disproportionately more likely to purchase again, and their future transactions generate disproportionately more revenue than the median customer \cite{Hughes1996}. This regularity constitutes a retail-specific manifestation of the Pareto principle.
+
+Formally, each RFM dimension is typically discretised into quintile bins $\{1, 2, 3, 4, 5\}$, yielding a composite RFM score:
+
+\begin{equation}
+    \text{RFM}_i = w_R \cdot R_i^* + w_F \cdot F_i^* + w_M \cdot M_i^*
+    \label{eq:rfm_score}
+\end{equation}
+
+where $(R_i^*, F_i^*, M_i^*)$ are the quintile ranks and $(w_R, w_F, w_M)$ are domain-derived weights, commonly set to $(0.5, 0.3, 0.2)$ to reflect the empirically stronger predictive power of Recency over Monetary value in most retail contexts.
+
+\subsection{Cluster Validity Indices}
+
+The quality of a $k$-partition produced by any clustering algorithm is assessed through internal validity indices that measure intra-cluster cohesion relative to inter-cluster separation:
+
+\begin{equation}
+    \text{Silhouette}(i) = \frac{b(i) - a(i)}{\max\{a(i), b(i)\}}, \quad s \in [-1, 1]
+    \label{eq:silhouette}
+\end{equation}
+
+where $a(i)$ is the mean distance from point $i$ to all other points in its cluster, and $b(i)$ the mean distance to the nearest non-home cluster. A mean silhouette score $\bar{s} > 0.5$ indicates a well-separated partition \cite{jain1999data}.
+
+The Davies-Bouldin Index provides a complementary perspective:
+
+\begin{equation}
+    \text{DB} = \frac{1}{k} \sum_{j=1}^k \max_{l \neq j} \left\{ \frac{s_j + s_l}{d_{jl}} \right\}
+    \label{eq:db_index}
+\end{equation}
+
+where $s_j$ is the average within-cluster scatter of cluster $j$ and $d_{jl}$ the distance between centroids $j$ and $l$. Lower DB values indicate better-separated, more compact clusters.
+
+% =============================================================================
+\section{Customer Lifetime Value: Theoretical Foundations}
+% =============================================================================
+
+\subsection{The Economic Logic of CLV}
+
+Customer Lifetime Value (CLV) formalises the present worth of the expected future cash flows attributable to a specific customer relationship. The general deterministic formulation is:
+
+\begin{equation}
+    \text{CLV}_i = \sum_{t=0}^{T} \frac{R_{i,t} - C_{i,t}}{(1 + d)^t}
+    \label{eq:clv_det2}
+\end{equation}
+
+where $R_{i,t}$ and $C_{i,t}$ represent revenue and cost associated with customer $i$ in period $t$, $d$ the periodic discount rate, and $T$ the planning horizon \cite{Blattberg2001}. Equation~(\ref{eq:clv_det2}) provides exact valuations in contractual settings (subscriptions, insurance policies) where future cash flows are partially observable. In non-contractual retail — the setting of this thesis — both the \textit{timing} and the \textit{occurrence} of future transactions are unobservable and must be treated as random variables.
+
+\subsection{Non-Contractual Probabilistic CLV: The BG/NBD Model}
+
+The Beta-Geometric / Negative Binomial Distribution (BG/NBD) model \cite{FaderHardieLee2005} is the established standard for probabilistic CLV prediction in non-contractual retail. It models the purchase history of customer $i$ as the realisation of two simultaneous latent processes:
+
+\begin{enumerate}[noitemsep]
+    \item \textbf{Transaction rate}: while alive, customer $i$ generates purchases as a Poisson process with individual rate $\lambda_i \sim \text{Gamma}(r, \alpha)$, capturing cross-customer heterogeneity.
+    \item \textbf{Dropout}: after each transaction, the customer permanently drops out with individual probability $p_i \sim \text{Beta}(a, b)$.
+\end{enumerate}
+
+Given the sufficient statistics $(x, t_x, T)$ — the number of repeat purchases, the time of the last purchase, and the observation window — the model yields a closed-form expression for the expected number of future transactions over a horizon of $\tau$ time units:
+
+\begin{equation}
+    \mathbb{E}\bigl[Y_i(\tau) \mid x, t_x, T\bigr] = \frac{A_0(r, \alpha, a, b; x, t_x, T) \cdot \tau}{B(a, b+x+1)/B(a,b)}
+    \label{eq:bgnbd_forecast}
+\end{equation}
+
+where $A_0$ is a closed-form term involving the Gaussian hypergeometric function and $B(\cdot,\cdot)$ is the Beta function. The four parameters $(r, \alpha, a, b)$ are estimated by maximum likelihood on the calibration-period transaction panel.
+
+\subsection{Monetary Value Modelling: The Gamma-Gamma Model}
+
+The expected monetary value per transaction is modelled separately by the Gamma-Gamma model \cite{FaderHardie2013}, which assumes that transaction values for a given customer $i$ follow a Gamma distribution with shape $p$ and individual rate $\nu_i$, where $\nu_i \sim \text{Gamma}(q, \gamma)$ across the population. The conditional expected transaction value is:
+
+\begin{equation}
+    \mathbb{E}[M_i \mid p, q, \gamma, \bar{m}_i, x_i] = \frac{p\gamma + \bar{m}_i x_i}{p + x_i - 1} \cdot \frac{q-1}{q}
+    \label{eq:gamma_gamma2}
+\end{equation}
+
+The full probabilistic CLV estimate for a horizon $\tau$ at discount rate $d$ is then:
+
+\begin{equation}
+    \widehat{\text{CLV}}_i(\tau) = \mathbb{E}[Y_i(\tau)] \times \mathbb{E}[M_i] \times \frac{1}{(1+d)^\tau}
+    \label{eq:prob_clv}
+\end{equation}
+
+This three-component formula — expected transaction frequency $\times$ expected transaction value $\times$ discount factor — constitutes the probabilistic CLV pipeline employed throughout the empirical chapters of this thesis.
+
+% ─────────────────────────────────────────────────────────────────────────────
+\section*{Conclusion}
+\addcontentsline{toc}{section}{Conclusion}
+% ─────────────────────────────────────────────────────────────────────────────
+
+This chapter has constructed the theoretical scaffolding for the integrated customer intelligence pipeline: (i)~the machine learning taxonomy providing the algorithmic building blocks — K-Means, XGBoost, LSTM — deployed in later empirical phases; (ii)~the RFM framework and its cluster validity infrastructure providing the foundation for behavioural segmentation; and (iii)~the probabilistic CLV pipeline — BG/NBD paired with the Gamma-Gamma model — providing the mechanism for translating historical transaction data into forward-looking customer valuations. The thematic literature review of Chapter~2 will situate each of these theoretical elements within the empirical research landscape, identify the gaps the present thesis addresses, and motivate the methodological choices adopted in Chapter~3.

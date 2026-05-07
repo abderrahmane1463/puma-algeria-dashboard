@@ -62,17 +62,17 @@ COLS_TO_DROP = [
 
 # ══ Segment palettes (single definition) ══════════════════════════════════════
 SEGMENT_COLORS_5 = {
-    'Champions'       : '#2ecc71',
-    'Loyal Customers' : '#3498db',
-    'New Customers'   : '#f1c40f',
-    'At Risk'         : '#e67e22',
-    'Lost'            : '#e74c3c',
+    'Champions': '#2ecc71',
+    'Loyal Customers': '#3498db',
+    'New Customers': '#f1c40f',
+    'At Risk': '#e67e22',
+    'Lost': '#e74c3c',
 }
 KMEANS_COLORS = {
     'Champions': '#2ecc71',
     'Promising': '#3498db',
-    'At Risk'  : '#e67e22',
-    'Dormant'  : '#e74c3c',
+    'At Risk': '#e67e22',
+    'Dormant': '#e74c3c',
 }
 TIER_COLORS = {
     'High CLV'  : '#2ecc71',

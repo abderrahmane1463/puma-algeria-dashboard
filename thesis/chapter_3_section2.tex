@@ -1,0 +1,111 @@
+\documentclass[12pt,a4paper]{report}
+\usepackage[utf8]{inputenc}
+\usepackage[english]{babel}
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{amssymb}
+\usepackage{graphicx}
+\usepackage{hyperref}
+\usepackage{booktabs}
+\usepackage{float}
+\usepackage{geometry}
+\usepackage{setspace}
+\usepackage{caption}
+\usepackage{subcaption}
+\usepackage{titlesec}
+\usepackage[T1]{fontenc}
+\usepackage[scaled=0.92]{helvet} 
+\renewcommand{\familydefault}{\sfdefault}
+
+% Aligning rigorously with the ENSSEA standard
+\geometry{margin=2.5cm, left=3cm} 
+\setstretch{1.5}
+
+\titleformat{\section}
+  {\normalfont\Large\bfseries}{\thesection \ - }{1em}{}
+\titleformat{\subsection}
+  {\normalfont\large\bfseries}{\thesubsection \ - }{1em}{}
+\titleformat{\subsubsection}
+  {\normalfont\normalsize\bfseries\underline}{\thesubsubsection \ - }{1em}{}
+
+\begin{document}
+
+\setcounter{chapter}{3} 
+\setcounter{section}{1}
+
+% -----------------------------------------------------------------------------
+\section{Customer Segmentation and Empirical CLV Prediction}
+
+\subsection{Construction of RFM Variables and Clustering Algorithms (K-Means)}
+The foundational premise of Customer Relationship Management (CRM) revolves around behavioral mapping\footnote{Peppers, D. \& Rogers, M. : \textit{Managing Customer Relationships}, John Wiley \& Sons, New Jersey, 2011, p. 74.}. Rather than assuming a general homogeneity across the consumer base, this thesis asserts that predicting future interactions entirely requires mathematically isolating distinct client segments governed by observable historical trajectories.
+
+Following the initial data pre-processing phase, the operational matrix consisted exclusively of identifiable, active retail actors—isolated structurally via \textbf{35,696 unique customers}. The initial algorithmic architecture tasked with segmenting this cohort operated purely on the quantitative derivation of the Recency, Frequency, and Monetary (RFM) components. Utilizing high-performance programming techniques, the explicit behavioral trio was established relative to a fixed baseline threshold snapshot explicitly locked at January 2, 2026.
+
+Classical RFM modeling artificially assigns uniform numeric constraints (e.g., scoring $1$ representing the lowest quintile and $5$ the peak percentile). The mathematical binning executed in the Python environment specifically instituted highly rigid parameters to directly accommodate PUMA Algeria's logistical reality:
+\begin{enumerate}
+    \item \textbf{Recency ($R$)}: Calculated utilizing Boolean constraints assigning bins strictly at bounds \textit{[-1, 60, 120, 210, 270]}\footnote{Hughes, A. M. : \textit{Strategic Database Marketing}, McGraw-Hill, New York, 1994, p. 52.}. Specifically, transactions occurring within two months returned a peak $R=5$, whereas any transactions decaying beyond 9 months (270 days) crashed to the absolute bottom threshold $R=1$.
+    \item \textbf{Frequency ($F$)}: Partitioned forcefully via manual bins at \textit{[0, 1, 2, 3, 5]}. A customer registering slightly over 5 historically separate transaction days achieves the peak rank $F=5$.
+    \item \textbf{Monetary ($M$)}: Generated explicitly using rank-based, floating decile limits mapping financial parameters natively representing the specific Pareto distribution: separating quantiles progressively at the \textit{30\%}, \textit{50\%}, \textit{70\%}, and \textit{90\%} demarcations.
+\end{enumerate}
+
+Traditional literature often dictates synthesizing these three variables generically into $5 \times 5 \times 5$ distinct mini-cubes representing 125 fractional states. Considering corporate executive dashboards necessitate immediate visual interpretability, these 125 possible states required strict compression. The subsequent methodology executed a massive philosophical departure from standard CRM mapping: constructing a \textbf{Strict Business Logic Grid}. By programming deterministic algorithmic cascading, boundary overlaps were forcibly erased:
+\begin{itemize}
+    \item \textbf{New Customers ($R \geq 4$, $F \leq 2$)}: This mathematical boundary completely seals the parameter, natively guaranteeing an extremely low global average recency metric (0-120 days) while aggressively preventing the structural bleeding of "old" buyers testing the brand once in the deep past.
+    \item \textbf{At Risk ($R \in [2, 3] \text{ and } F \geq 2$; or $R = 1 \text{ and } F \geq 3$)}: Elegantly rebalanced logic designed explicitly to structurally salvage loyal returning buyers. Customers maintaining an undeniably robust historical habit ($F \geq 3$) but decaying absent between $120$ to $>270$ days were mathematically rescued from plummeting blindly into the "Lost" bucket.
+\end{itemize}
+
+Beyond deterministic, human-designated bounding rules, the continuous pipeline integrated unrestricted spatial geometry by processing \textbf{K-Means Clustering ($k=4$)}\footnote{MacQueen, J. : \textit{Some Methods for Classification and Analysis of Multivariate Observations}, Berkeley Symposium on Mathematical Statistics and Probability, 1967, p. 281.}. K-Means represents an unsupervised learning paradigm minimizing spatial variance vectors calculating the within-cluster sum of squares (WCSS) Euclidean distances. 
+
+However, mathematical manipulation executing on raw Algerian retail revenue results in deterministic catastrophic failure due fundamentally to the extreme right-skewness of fractional "Whale" buyers distorting Euclidean cluster centroids physically toward infinity. Therefore, the architectural logic normalized identical continuous dimensions aggressively using the continuous mapping \texttt{np.log1p}—which computes exactly $\log(1+x)$ maintaining structural resistance against null arrays—alongside standard deviation smoothing.
+
+The K-Means algorithm successfully mathematically optimized spatially at \textbf{$k=4$}. The evaluated spatial structure achieved an internal \textbf{Silhouette Score of 0.399} paired inherently with an exceptional density spatial \textbf{Davies-Bouldin Index of 0.955}. 
+
+\textbf{Interpretation of Clustering Results}: Within isolated commercial environments wherein psychological human behavior overlaps seamlessly, achieving a Silhouette score nearing $0.40$ is highly significant. It officially establishes that retail profiles do not exist in isolated categorical islands, but rather in a continuous spectrum heavily skewed toward low-frequency behaviors. A Davies-Bouldin index of $0.955$ statistically verifies that the boundaries of the four resulting clusters (\textit{Champions}, \textit{Promising}, \textit{At Risk}, and \textit{Dormant}) are distinctly tighter internally than they are close to opposing centroids.
+
+\begin{figure}[H]
+    \centering
+    \vspace{4cm} 
+    \caption{Figure N°02 : 3D Plotly Visualization embedding K-Means Structural Separation Vectors mapping across log-normalized dimensions.}
+    \vspace{0.2cm}
+    \footnotesize{\textit{Source : Local Streamlit Graphical Output, PUMA Dataset 2026.}}
+    \label{fig:kmeans_3d}
+\end{figure}
+
+\subsection{Probabilistic Yield Analytics (BG/NBD and Gamma-Gamma)}
+While deterministic heuristics fundamentally analyze static backwards-looking behavioral actions, modern predictive CRM architecture depends almost exclusively on dynamically projecting forward states into probability fields. In retail environments, operations dictate a profoundly \textit{non-contractual} relationship; individual customers maintain no formal necessity to explicitly announce their defection—they merely expire silently. To mathematically resolve predicting forward-looking transactional elasticity probability, we instantiated the specialized algorithms: The Beta-Geometric/Negative Binomial Distribution (BG/NBD)\footnote{Fader, P.S. \& Hardie, B.G.S. : \textit{Counting Your Customers the Easy Way}, Marketing Science, 24(2), 2005, p. 275.} tightly coupled with Gamma-Gamma elasticity modeling arrays.
+
+The BG/NBD execution anchors on fundamentally brilliant probabilistic sub-matrices:
+\begin{enumerate}
+    \item \textbf{Transaction Rate Process}: It logically assumes that while technically "alive", an individual retail actor engages randomly, adhering aggressively to a static sequence Poisson distribution process defined entirely by a transaction rate parameter $\lambda$. To account for behavioral heterogeneity among the 35,696 Algerian clients, $\lambda$ is structured continuously according to a Gamma mathematical distribution.
+    \item \textbf{Dropout Decay Process}: Functioning instantly subsequent to any single transaction, a consumer possesses an embedded latent probability marker $p$ dictating an instant transformation transitioning permanently into a dead, inactive churn state. To synthesize variability occurring systemically regarding individual tolerance levels across grids, this drop-out logic factor $p$ is governed through Beta probabilistic distributions.
+\end{enumerate}
+
+Crucially, the execution pipeline aggregated strictly the temporal arrays converting invoice-lines mathematically straight into isolated transaction frequencies operating specifically upon a distinct weekly time frame horizon (`freq='W'`). Selecting multi-purchasers exclusively, the system confirmed precisely \textbf{8,562 verifiable repeat actors}.
+
+Beyond behavioral timing, projecting absolute margin revenue explicitly necessitates deploying the corresponding Gamma-Gamma algorithm. Prior to calculation initialization, the Python architecture engineered an explicit clipping threshold to violently suppress B2B statistical outlier distension. Extracting the maximum ceiling dynamically via a continuous \textit{99th percentile} quantile marker prevented fractional wholesale buyers from destroying individual behavioral averages. Concurrently, a rigorous Spearman’s Rank constraint successfully proved systemic mathematical independence linking physical transaction occurrences towards unit margin averages, fulfilling safely the primary theoretical requirement for Gamma-Gamma integrity.
+
+\subsection{Model Validation, Segment Interpretation and Strategic Profiling}
+An inherent foundational axiom declares: deterministic assertions executing inside probability fields hold entirely zero theoretical validity when entirely devoid of rigorous out-of-sample systemic validation. Consequently, the architecture established a complex systemic testing parameter enforcing a massive \textbf{90-day independent Holdout framework}\footnote{Hastie, T., Tibshirani, R. \& Friedman, J. : \textit{The Elements of Statistical Learning}, Springer, New York, 2009, p. 222.}. 
+
+The primary predictive engine was structurally calibrated entirely localized exclusively operating against the isolated primary timeline, completely mathematically blind to physical commerce occurring after the defined calibration split. The algorithm was subsequently commanded to project volumetric purchase occurrences identically manifesting across the remaining invisible 90-day Holdout sector. Evaluation arrays mapping explicit Expected Purchase distributions against Actual physically executed action rates proved extremely tight structural adhesion.
+
+\textbf{Comprehensive Interpretation of CLV Results}: The systemic yield executing exactly the compounding Net Present Value (NPV) variables mapped into an explicit 52-week tracking parameter. Using an explicit generalized weekly mathematical discount rate ($\sim 0.0023$) to mirror the depreciation in Algerian monetary contexts, the systemic calculation revealed an official structural \textbf{Median CLV of 11,044 DZD}. 
+This finding is of paramount commercial consequence. It strictly establishes that acquiring maintaining an active repeat buyer inside the PUMA network warrants roughly $11,000$ DZD minimum in anticipated future cash flow. Attempting customer acquisition exceeding $11,000$ DZD mathematically guarantees systemic enterprise bankruptcy. 
+
+Within the graphical interactive dashboard, explicitly calculating operational tracking dynamics via continuous $P(\text{Alive})$ parameters drives the absolute apex of managerial operations. The operational breakdown specifies:
+\begin{itemize}
+    \item \textbf{Optimal Zone ($P > 0.8$)}: Clients fundamentally behaving in rhythm with their predicted parameters. Allocating massive discounting budget here is entirely wasteful.
+    \item \textbf{The Transition Trigger ($P \in [0.4, 0.7]$)}: This vector defines exactly clients harboring significant intrinsic projected capital value standing completely on the precipice bordering continuous churn expiration—offering exactly the single most highly leveraged ROI targeted algorithmic optimization node inside the operational CRM ecosystem.
+    \item \textbf{Terminal State ($P < 0.2$)}: Algorithms confirm the actor has probabilistically abandoned the brand.
+\end{itemize}
+
+\begin{figure}[H]
+    \centering
+    \vspace{4cm} 
+    \caption{Figure N°03 : Model Validation demonstrating continuous mathematical adherence scaling between Actual Purchase Frequencies and BG/NBD Expected Projections across the 90-day framework.}
+    \vspace{0.2cm}
+    \footnotesize{\textit{Source : Algorithmic Lifetime Value Plot Output, 2026.}}
+    \label{fig:clv_validation}
+\end{figure}
+
+\end{document}

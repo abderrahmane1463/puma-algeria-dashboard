@@ -202,7 +202,7 @@ def load_artifacts(bust_cache=False):
 
 # ── Check artifacts ──────────────────────────────────────────────────────────
 # Set bust_cache=True (or any new unique value) if you just updated the data pipeline
-artifacts, missing_files = load_artifacts(bust_cache="Refresh_v14_RebalanceLost")
+artifacts, missing_files = load_artifacts(bust_cache="Refresh_v15_RestoreColors")
 
 if artifacts is None:
     st.error(f"Artifacts not found: {', '.join(missing_files)}.\n\n"
@@ -651,7 +651,7 @@ def render_rfm(rfm):
         fig = go.Figure(go.Pie(
             labels=sc['Segment'], values=sc['Count'], hole=0.55,
             marker=dict(
-                colors=[SEGMENT_COLORS_5.get(s, '#888') for s in sc['Segment']],
+                colors=[SEGMENT_COLORS_5.get(s.strip() if hasattr(s, 'strip') else s, '#888') for s in sc['Segment']],
                 line=dict(color='#0D0D0D', width=2)),
             hovertemplate='%{label}<br>Count: %{value:,}<br>%{percent}<extra></extra>',
         ))

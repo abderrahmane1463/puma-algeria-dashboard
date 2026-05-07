@@ -1,0 +1,524 @@
+1/22
+  المدرسة الوطنية العليا للحصاء و القتصاد التطبيقي
+École Nationale Supérieure de Statistique et d’Économie Appliquée  
+اسات و الشهادات رمديرية الد Direction des études et des diplômes
+دليلتقديم المذكرات
+Guide de présentation des mémoires
+Document remis aux enseignants de méthodologie de l 'ENSSEA, pour
+corrections, commentaires et enrichissement, en décembre 2017.
+2018
+2/22
+Ce  guide  présenté  aux  étudiants  de  l'Ecole  Nationale  Supérieure  de
+Statistique et d’Économie Appliquée a pour objectif principal, d'une part,
+d'orienter les étudiants de l'Ecole et de les aider dans l'organisation, la
+mise en forme et la réalisation de leurs mémoires, conformément aux
+normes et conventions académiques établies ; et d'autre part, de proposer
+une  norme  commune  et  unifiée  de  rédaction  et  de  présentation  des
+mémoires à l'ensemble des étudiants de l'Ecole.
+Remarques Importantes
+A la fin de son cursus, l'étudiant de l'Ecole doit réaliser un mémoire de fin
+d'études,  le  soutenir  publiquement  et  le  soumettre  à  l'évaluation.
+L'étudiant est ainsi contraint de préparer son mémoire selon des règles
+méthodologiques et formelles déterminées.
+A) La rédaction et la présentation du mémoire doivent être conformes 
+au contenu de ce guide.
+B) Le mémoire doit être imprimé en recto seulement. 
+C) Les délais de dépôt du mémoire sont fixés par l'administration et 
+affichés sur le site de l'Ecole.
+D) Le nombre d'exemplaires à déposer :
+1. Avant la soutenance (Au niveau des départements):
+ L'exemplaire sur la base duquel le conseil scientifique ou
+l'administration désignera les membres du jury.
+ Un  exemplaire  pour  chaque  membre  du  jury  de
+soutenance (Président, Encadreur et Examinateurs).3/22
+2. Après la soutenance, dans un délais maximum de 15 
+jours, (Au niveau de la bibliothèque de l'Ecole):
+ (01) Un exemplaire imprimé, dûment corrigé et portant
+les  éventuelles  corrections  demandées  lors  de  la
+soutenance, après visa du président du jury et à défaut
+l'encadreur, en cas de nécessité.
+ (01) Un exemplaire numérique à déposer via le site 
+internet de l'Ecole.
+ (01) Un exemplaire sur Cédérom.
+Le mémoire englobe, dans l'ordre, les éléments suivants, à savoir :
+1. La Page de garde– Couverture,
+2. Une page blanche,
+3. Reprise de la Page de garde – 
+couverture,
+4. Page des Dédicaces,
+5. Page des Remerciements,
+6. Liste des abréviations,
+7. Les listes  (liste des tableaux, 
+liste des figures, liste des 
+cartes, etc...),
+8. Résumé avec les mots clés 
+rédigé dans deux langues,
+9. Le sommaire du mémoire,
+10. L'introduction,
+11. Le développement,
+12. La conclusion,
+13. La bibliographie,
+14. Les Annexes,
+15. La Table des matières,
+1- La couverture
+La couverture doit contenir les informations suivantes :
+• Le ministère de tutelle « Ministère de l'enseignement supérieur 
+et de la recherche scientifique »,
+• Le nom de l'établissement de formation « Ecole Nationale 
+Supérieure de Statistique et d'Economie Appliquée, ENSSEA»,
+• Le département, par exemple : « Département de statistique 
+appliquée et d’économétrie »,
+• Le diplôme préparé « Master » et la spécialité, par exemple : 
+«Statistique appliquée »,
+• Le thème du mémoire écrit dans un cadre au milieu de la couverture
+• Le nom et le prénom de l'étudiant ,
+• Le nom, prénom et le grade scientifique de l'encadreur,
+• L'année de la promotion,4/22
+2- Les Dédicaces
+Les dédicaces sont rédigées sur une seule page, l'étudiant est libre de
+dédicacer son mémoire, dans la limite du respect du contexte académique
+du travail présenté, tout en évitant d'y intégrer des photos ou des dessins.
+3- Les Remerciements
+Les remerciements sont rédigés sur une seule page, l'étudiant présente
+ses remerciements à ceux qui l'ont aidé à réaliser son mémoire,  tout en
+évitant d'y intégrer des photos ou des dessins.
+4- La Liste des abréviations    
+Si l'étudiant a utilisé dans son mémoire des abréviations, il doit dresser
+une liste explicative des abréviations utilisées,
+Cette liste doit précéder l'introduction, afin que le lecteur du mémoire ait
+une idée sur le sens des abréviations avant d'entamer la lecture. 
+5- Le résumé et les mots clés
+L'étudiant doit rédiger un bref résumé de son mémoire (ABSTRACT)  dans
+deux  langues de son choix (Arabe, Français ou anglais), et doit citer les
+mots clés liés au thème de son mémoire.
+6- Le sommaire du mémoire 
+Le plan du mémoire doit contenir ses grands axes, à savoir les titres de
+premier et de second degré : ( Chapitres et sections ) sans les autres
+composantes du mémoire, et avec numérotation des pages, 
+7- L'introduction 
+L'introduction est la première page numérotée du mémoire, elle doit être
+brève et doit contenir les éléments suivants :
+1. Les motifs du choix du thème.
+2. L'importance  théorique  et/ou
+pratique du thème.
+3. La problématique.
+4. les hypothèses.
+5. L'état de la recherche dans le
+domaine.
+6. Les  limites  et  le  champs  de
+l'étude
+7. La méthodologie adoptée.
+8. Le plan de la recherche adopté5/22
+8- Le développement 
+Le développement est la partie substantielle du mémoire, et l'étudiant doit
+respecter dans sa rédaction les règles méthodologiques et linguistiques
+convenues.
+9- La conclusion 
+La conclusion est rédigée après le développement, et doit contenir, d'une
+part, un exposé bref et concentré du thème du mémoire et, d'autre part,
+les résultats de la recherche ainsi que des suggestions, tout en ouvrant les
+horizons de recherche sur ce thème dans le future.
+10- La bibliographie 
+La bibliographie vient juste après la conclusion, et la liste des références
+bibliographiques doit être  présentée selon les normes mentionnées dans
+ce guide.
+11- Les annexes 
+Les annexes rassemblent des informations ou des documents pertinents
+qui ne sont pas essentielles à la compréhension du lecteur du mémoire,
+mais  qui  ont  été  nécessaires  à  sa  réalisation  ou  qui  complètent
+probablement celles présentées dans le développement.
+Les annexes ne sont pas obligatoires, mais dans le cas où elles existent,
+elles seront insérées juste après la bibliographie, dans l'ordre de parution
+dans le mémoire .
+12- La table des matières
+La  table  des  matières  est  le  dernier  élément  du  mémoire,  et  doit
+reprendre tout les éléments  précédents  (des dédicaces, aux listes) et
+contenir l'ensemble des titres et sous titres du mémoire (chapitre, section,
+sous sections) avec leur numéro de page.
+13- La structuration du mémoire (Plan)
+Le mémoire est structuré en :
+ Titres de premier degré : chapitre 1 – chapitre 2 – chapitre 3
+ Titres de second degré :  1.1 – 1.2 – 1.3
+ Titres de troisième degré : 1.1.1 – 1.1.2. – 1.1.3
+ Titres de quatrième degré : 1.1.1.1 – 1.1.1.2. – 1.1.1.36/22
+14- La numérotation des pages
+Les  pages  du  mémoire  doivent  être  numérotées  en  continue,  et  la
+pagination sera indiquée «  centrée » en bas de page. La numérotation
+commence de l'introduction à la table des matières.
+Toutes  les  pages  qui  précèdent  l'introduction  (page  de  garde,  les
+dédicaces, les remerciements, la liste des abréviations, etc,) ne sont pas
+numérotées.
+La bibliographie
+La  bibliographie  juste  après  la  conclusion,  et  la  liste  des  références
+bibliographiques  doit  être   présentée  selon  l'ordre  et  les  normes
+suivantes :
+- les textes officiels ;
+- les ouvrages ;
+- les périodiques (revues et journaux) ;
+- les thèses et mémoires ;
+- les communications aux séminaires et colloques ;
+- la webographie ou les sources électroniques ;
+A - Les textes officiels 
+Les textes officiels sont classés selon les critères suivants :
+Le pouvoir libératoire   la date de publication     Le numéro d'ordre
+Si les textes officiels ont le même pouvoir libératoire, il seront classés 
+selon leur date de publication, et s'ils ont le même pouvoir libératoire et 
+portent la même date de publication, le classement se fera selon leur 
+numéro d'ordre.
+B- Les ouvrages
+Les ouvrages sont cités par ordre alphabétique des noms d'auteurs, et 
+doivent contenir les informations suivantes :
+1. Le  nom  et  le  prénom  de
+l’auteur,  (la  première  lettre
+en majuscule)
+2. Le titre complet en gras,
+3. Le nom du traducteur, s’il y a
+lieu, entre parenthèses,
+4. le lieu de l'édition
+5. Le nom de la maison d’édition
+ou de l’organisme qui a publié
+l’ouvrage,
+6. Le numéro de l'édition,
+7. L’année  de  parution  de
+l’ouvrage,
+8. Le  nombre  de  page  de
+l'ouvrage,7/22
+Exemple :
+Ouvrages en langue arabe : 
+محديد  أحمد التأمين و حساب الخاطرة ،  الطبوعاتن )ترجمة فايز ألبق وخالد بيوض(،الطبعة اولى،  ديو 
+الجامعية، الجزائر ، 1998.
+علي توفيق الصادق : ة التنافسية للقتصاديات العربية في اسواق العالية رالقد النقد العربي، أبو ظبي، ق ، صندو
+أكتوبر 1999.
+Ouvrages en langues étrangères :
+Tessier, R. :  Concertation économique : vers de nouveaux modèles ? , Presses
+de l’Université du Québec, Montréal,  1995,
+Popcorn, F., Martin, A., et Simon, D. (2000) : On the measurement of poverty ,
+(Trad. M. Perron), Les Éditions de l’Homme,  Montréal, 2007. 
+C- Les articles de périodiques
+Les articles sont cités par ordre alphabétique des noms d'auteurs, et 
+doivent contenir les informations suivantes :
+1. Le nom et le prénom de 
+l’auteur, (la première lettre 
+en majuscule)
+2. Le titre complet de l'article, 
+entre guillemets,
+3. Le nom du périodique en gras,
+4. le numéro et Le volume du 
+périodique,
+5.  La date et le lieu de 
+publication de l'article,
+6. Les numéros de pages de 
+l’article. 
+Exemple :
+Les articles en langue arabe :
+زكي حنوش »وبي في دعم التنمية في الوطن العربي ر اتحاد اوردو «،مجلة آفاق اقتصاديةات العربية ر، اما 
+التحدة، العدد 82، 2000،ص ص 20-31, 
+حسن علي خرموش »دن رالعولة وانعكاساتها على اسواق الالية العربية )حالة ا  «،مجلة العلوم انسانية،
+ي، قسنطينة، العددرجامعة منتو17،2002. ص ص27-35, 8/22
+Les articles en langues étrangères :
+Van de Ven, H., Mackay, A., et Poole, S. : « Explaining Development and Change
+in Organizations », Academy of Management Review , 24, 4, mars 2001, 529-
+535. 
+Alesina,  A.  and  Rodrik,  D.  :  « Distributive  politics  and  economic  growth  »,
+Quarterly Journal of Economics, volume 109, issue 2 (May 1994), 465-490.
+Ravallion,  M. :  «  Can  high-Inequality  developing  Contries  Escape  Absolute
+Poverty? », Economic Letters, Vol. 56, 1997, 51-57.
+D- Les thèses et mémoires
+Les thèses et mémoires sont classés selon deux critères :
+ d'abord, le critère du grade scientifique :
+thèses de doctorat - mémoires de magistère - mémoires de master
+ ensuite, le critère d'ordre alphabétique des noms des chercheurs
+la référence doit reprendre les éléments suivants :
+1. Le nom et le prénom de 
+l’auteur de la thèse,
+2. Le thème du mémoire, 
+souligné  et entre 
+guillemets,
+3. Le grade scientifique (doctorat,
+magistère, master),
+4. La spécialité (économie, droit),
+5. Le lieu de soutenance (pays et 
+université ou école),
+6. L'éditeur (lieu et maison 
+d'édition) si la thèse a été 
+publiée,
+7. L'année d'édition,
+Exemple : 
+Les thèses en langue arabe :
+عمار بوشناف اليزة التنافسية للمؤسسات افتصادية الجزائرية" ة أعمال، جامعة الجزائر- رسالة ماجستير ، إدا ر، 
+2 2002،
+مولود حشمان : "محددات اجر في الجزائر "،ة،جامعة الجزائر- راه دولة غير منشو رحة دكتو و أطر2،2000. 
+Les thèses en langue étrangère :
+Abdeli Riad  : «  Processus d’ouverture de l’économie algérienne, vingt ans de
+transition.  Evolution  et  performance     »,  Thèse  de  Doctorat,  Université  de
+Paris.8, 2001.9/22
+Les renvois bibliographiques en bas de page
+Le renvoi en bas de page est utilisé par l'étudiant pour confirmer son
+honnêteté intellectuelle en citant les références bibliographiques utilisées
+dans la rédaction de son mémoire. Ces renvois doivent être rédigés selon
+les normes suivantes :
+1)le renvoi bibliographique à une   référence bibliographique unique   :
+L’étudiant  doit  citer  toutes  les  informations  concernant  la  référence
+bibliographique.
+Exemple:
+علي توفيق الصادق : ة التنافسية للقتصاديات العربية في اسواق العالية رالقد النقد العربي، أبو ظبي، ق ، صندو
+أكتوبر 1999، ص126,
+Tessier, R. :  Concertation économique : vers de nouveaux modèles ? , Presses
+de l’Université du Québec, Montréal,  1995, p. 112.
+2)Les renvois multiples à la même référence bibliographique (sur la
+même page):
+Exemple : 
+Dans  le  premier  renvoi,  l’étudiant  doit  citer  toutes  les  informations
+concernant la référence bibliographique.
+علي توفيق الصادق : ة التنافسية للقتصاديات العربية في اسواق العالية رالقد النقد العربي، أبو ظبي، ق ، صندو
+أكتوبر 1999، ص126,
+Tessier, R. :  Concertation économique : vers de nouveaux modèles ? , Presses
+de l’Université du Québec, Montréal,  1995, p. 112.
+Dans les autres renvois,  l’étudiant ne doit citer que la mention «  Ibid. »,
+suivie du numéro de la page, 
+نفس الرجع، ص 135.
+Ibid., p. 75.10/22
+3)Les  renvois  multiples  à  la  même  référence  bibliographique  (sur
+plusieurs pages ):
+Exemple : 
+Dans  le  premier  renvoi,  l’étudiant  doit  citer  toutes  les  informations
+concernant la référence bibliographique.
+علي توفيق الصادق : ة التنافسية للقتصاديات العربية في اسواق العالية رالقد النقد العربي، أبو ظبي، ق ، صندو
+أكتوبر 1999، ص126.
+Tessier, R. :  Concertation économique : vers de nouveaux modèles ? , Presses
+de l’Université du Québec, Montréal,  1995, p. 112.
+Dans les autres renvois,  l’étudiant ne doit citer que le nom de l'auteur,
+suivi de la mention «op. cit.». 
+علي توفيق الصادق، مرجع سابق ، ص 9 5.
+Tessier, R., op. cit., p. 95.
+4)Les renvois à un auteur ayant plusieurs références bibliographiques :
+Si  l’étudiant  a  utilisé  plusieurs  références  bibliographiques  du  même
+auteur.
+Exemple : 
+فتح ا ولعلو اقتصاد العربي  وبية، ر والجموعة او  السلسلة اقتصادية، دار الحداثة، بيروت، 1982.
+فتح ا ولعلوومتوسطية، ربي والشراكة او رع الغاو الشر دار طبقال للنشر، الغرب، 1997. 
+Bouis, H.E. & Haddad, L.J.  : «  Are estimates of calorie-income elasticities too
+high?:  A  recalibration  of  the  plausible  range  »,  Journal  of  Development
+Economics, 39(2), pp. 333- 364, 1992.
+Bouis, H.E. & Haddad, L.J. :  The nutrition effects of sugarcane cropping in a
+Southern  Philippine  province ,  In  Agricultural  Commercialization,  Economic
+Development, and Nutrition, von Braun, J. & Kennedy, E. (eds.), Johns Hopkins
+University Press for IFPRI, Baltimore MD, 1994.11/22
+Dans  le  premier  renvoi,  l’étudiant  doit  citer  toutes  les  informations
+concernant la référence bibliographique.
+فتح ا ولعلواقتصاد العربي      بية،و واالجموعة ار  السلسلة اقتصادية، دار الحداثة، بيروت، 1982، ص105,
+فتح ا ولعلوومتوسطية، ربي والشراكة او رع الغاوالشر دار طبقال للنشر، الغرب، 1997، ص29,
+Bouis,  H.E.  &  Haddad,  L.J. :  Are  estimates  of  calorie-income  elasticities  too
+high?:  A  recalibration  of  the  plausible  range,  Journal  of  Development
+Economics, 39(2), 333- 364, 1992, p. 52.
+Bouis, H.E. & Haddad, L.J. :  The nutrition effects of sugarcane cropping in a
+Southern Philippine province , In : Agricultural Commercialization, Economic
+Development, and Nutrition, Von Braun, J. & Kennedy, E. (eds.), Johns Hopkins
+University Press for IFPRI, Baltimore MD, 1994, p. 68.
+Dans les autres renvois, l’étudiant doit citer que le nom de l'auteur, le titre
+de l'ouvrage ou l'article, suivis de la mention « op. cit.» ou «  Ibid. » selon
+le cas  (même page ou plusieurs  pages),  avec  le numéro  de la page
+concernée.
+فتح ا ولعلو اقتصاد العربي  وبية، ر والجموعة او مرجع سابق ، ص 105,
+فتح ا ولعلوومتوسطية، ربي والشراكة او رع الغاو الشر مرجع سابق ، ص 29,
+Bouis, H.E. & Haddad, L.J.  : «  Are estimates of calorie-income elasticities too
+high?: A recalibration of the plausible range », op. cit., p. 59.
+Bouis, H.E. & Haddad, L.J. :  The nutrition effects of sugarcane cropping in a
+Southern Philippine province, op. cit., p. 78.
+5)Les renvois à un ouvrage collectif avec plus de trois auteurs :
+Dans  le  premier  renvoi,  l’étudiant  doit  citer  toutes  les  informations
+concernant la référence bibliographique.
+Dans les autres renvois,  l’étudiant ne doit citer que le noms du premier
+auteur suivi de la mention « All).12/22
+Modèles de pages
+• La page de garde
+• Les titres des chapitres (intercalaires)
+• Le corps du mémoire
+• Les renvois bibliographiques
+• Les graphiques et illustrations
+• Les tableaux
+• Liste des graphiques et illustrations
+• Liste des tableaux13/22
+ECOLE NATIONALE SUPERIEURE 
+DE STATISTIQUE ET D’ECONOMIE APPLIQUEE
+E.N.S.S.E.A
+Département de Statistique  et d’Économie
+Appliquée
+Mémoire de fin de cycle en vue de l'obtention du diplôme de Master 
+Spécialité : Statistique Appliquée
+Etude Analytique et Prévisionnelle de la Production du ciment 
+Cas : Algerian Cement Company 
+Présenté par : Encadré par :
+LARBAOUI Noura Pr. TOUMACHE Rachid
+Maître de Conférence
+2018 – Cinquième promotion
+3 cm
+2 cm
+Police : verdana, Taille ; 12
+Centré et Gras
+Police : verdana, Taille ; 11
+Centré et Gras
+Police : verdana, Taille ; 12
+Centré et Gras
+2 cm
+2 cm14/22
+Chapitre 02 : 
+Télécommunications : impact de la
+qualité institutionnelle sur la
+performance régulatoire
+Pour les titres des Chapitres
+Police : verdana, Taille ; 20
+Centré et Gras15/22
+Pour les titres de second degré
+Police : verdana, Taille ; 14  Droite et Gras
+1.1 -  Modifications structurelles de l’industrie des 
+télécommunications
+Pour les titres de troisième degré
+Police : verdana, Taille ; 12  Droite et Gras-Souligné
+1.1.1 -  Design institutionnel de la régulation dans quelque 
+pays de l’OCDE
+Pour les titres de quatrième degré
+Police : verdana, Taille ; 12  Droite et Gras
+1.1.1.1 -  Quelques indicateurs de performance de l’industrie 
+des télécommunications16/22
+La défaillance des entreprises après l’octroi de crédits a différentes causes,
+mais elle ne se produit pas de manières subites car la dégradation de la
+situation financière de l’entreprise est relativement lente et progressive
+sur une durée précédant sa cessation de paiement.  La défaillance de
+l’entreprise peut avoir lieu à causes des facteurs extérieurs, mais celle-ci
+n’aurait pas lieu si l’entreprise n’était pas auparavant vulnérable. C’est
+pour cela que la méthode des scores, détaillée  dans ce chapitre,  est
+imposée comme outil de détection à priori de l’insolvabilité des entreprises
+ayant demandé des concours bancaires.
+1.1 - Notions sur la Méthode du Crédit Scoring
+La  notion  de  Crédit  Scoring  recouvre  plusieurs  aspects,  d'ordre
+conceptuel, technique et juridique.
+1.1.1 -   Aspects conceptuels sur le crédit scoring
+De Coussergues a défini le crédit scoring comme suit  : « Le crédit scoring
+est une technique statistique qui s’efforce de synthétiser le risque de non
+remboursement d’un crédit au moyen d’une note (score), Le problème est
+en  effet,  de  déceler  parmi  les  informations  qui  caractérisent  un
+emprunteur, celles qui «  expliquent » le mieux sa solvabilité. A chaque
+information, est attribuée une pondération et la totalisation est comparée
+à une note critique préalablement établie, indique s’il faut accepter ou
+refuser le crédit. A ce titre, le crédit scoring  facilite la prise de décision »1
+1.1.1.1 – Premier aspect :
+Le crédit scoring, par le biais d’une fonction score établie à partir d’un  
+échantillon, permet de trier les demandeurs de crédits en deux groupes,
+sains ou défaillants.
+De sa part,  Mester a défini le crédit scoring comme suit  : «  Le crédit
+scoring est une méthode statistique utilisée pour prédire la probabilité
+1 S. Decoursegue : « Gestion de la banques », Ed. Dunod, Paris, 1995, p.185
+Pour le corps du texte et ses
+paragraphes 
+Police : verdana,
+Taille ; 12  Justifié
+Interligne:1,5 
+Espacement avant
+paragraphe 0,6.
+Titre de
+troisième degré
+Titre de
+second degré
+Titre de
+quatrième degré17/22
+qu’un demandeur de prêt ou un débiteur existant fasse défaut ».
+1.1.1.2 – Deuxième aspect :
+Le crédit scoring est le processus d’assignation d’une note (ou score) à
+un emprunteur potentiel pour estimer la performance future de son prêt.
+Le Crédit Scoring utilise des mesures quantitatives de performance et les
+caractéristiques des  prêts précédents pour prédire la  performance des
+prêts futurs avec des caractéristiques  similaires.  Le  crédit  scoring
+n’approuve, ni rejette une demande de prêt, il peut plutôt prédire  la
+probabilité d’occurrence de mauvaise performance (défaut) comme
+définie par le préteur.
+Figure N°09 : Evolution de la production des GPL par région
+(1997-2007) 1
+Unité : millions de TM 
+Source: Statistical review of global LP Gas 2007
+Le crédit scoring constitue 2 un ensemble de modèles de décision et les
+techniques sous- jacentes qui aident dans la décision d’octroi des crédits
+de consommation.
+Plusieurs explications peuvent être fournies sur la définition et le rôle du
+1 Boubacar DIALLO « Un Modèle de “Crédit Scoring” pour une Institution de 
+Micro- Finance Africaine: le cas de NYESIGISO au Mali », Laboratoire d’Economie 
+d’Orléans (LEO), Université d’Orléans, Mai 2006, p.53.
+2 Ibid., p.85.
+L'unité de mesure
+et la source directe
+et indirecte
+Notes bibliographiques
+Titre de
+quatrième degré18/22
+crédit scoring, elles peuvent être résumées dans la figure ci-dessous :
+En résumé, on peut dire que le crédit scoring est un outil de gestion de
+risque de crédit  qui vise à prédire la probabilité de défaut d’un nouveau
+prêt en utilisant les prêts précédents. Ainsi, l’objet  du crédit scoring est
+de prédire le risque et non de l’expliquer; il est toutefois important
+d’analyser les principaux facteurs permettant de discriminer entre  bons et
+mauvais prêts.
+Fondée sur des analyses statistiques, cette technique de notation permet
+d’attribuer à chaque client de la banque une note de sont profil de risque
+pour la banque, il permet donc à cette dernière, d’utiliser les informations
+sur  les  caractéristiques  et  de  l’emprunteur  de  prévoir  sa  défaillance
+future.1
+Cette technique de sélection de la clientèle est apparue aux États-Unis
+dans les années 50, elle s’est progressivement développée en France à
+partir des années 1970. Les premiers modèles de l’analyse discriminante
+linéaire à la prévision de faillite d’entreprises étaient essentiellement les
+résultats des recherches de E.I Altman, 2  seul ou en collaboration.
+Aujourd’hui, les modèles de score sont de plus en plus utilisés dans les
+institutions financières notamment dans les banques commerciales. Ils
+sont devenus un outil courant d’octroi des crédits à la consommation mais
+tendent à se développer également pour la mesure du risque des crédits
+aux professionnels et aux petites et moyennes entreprises.
+1 S. Decoursegue, op. cit., p.188.
+2 E.I Altman :«Financial Rations, Discriminate Analysis and the Prediction of 
+Corporate Bankruptcy», Journal of Finance, 1968, pp.529-609, p.601.  
+Notes bibliographiques19/22
+Tableau N°03 : Production et consommation mondiale des GPL.
+Unité : million de TM  
+Zone Production Consommation Différence 
+Am- du  Nord               52.92 54.71 -1.79
+Am- latine        24.39 26.73 -2.34
+M. Orient 41.52 14.60 +26.92
+Afrique 15.98 9.68 +6.30
+Europe 39.79 40.33 -0.54
+Asie 48.28 72.38 -24.10
+Total         222.88 218.43
+Signe (-) : déficit     /   Signe (+) : excédent
+Source : OPEP, cité par : Decoursegue, op. cit., p.152. 
+1.2 - L’objectif des modèles de Crédit Scoring :
+La méthode de score est un outil de mesure du risque qui utilise des
+données  historiques  et  des  techniques  statistiques.  Le  support
+méthodologique pivot dans la conception d’un score, repose sur l’analyse
+des  données  et  plus  particulièrement  sur  l’analyse  discriminante  qui
+permet une appréciation globale de l’emprunteur, fondée sur quelques
+caractéristiques considérées simultanément. 
+L'unité de mesure
+et la source directe
+et indirecte20/22
+Liste des tableaux
+PageIntituléN°
+40Les mouvements d’affaires confiés1
+40Des ratios de gestion et d’activité02
+50Visualisation synthétique du bilan financier03
+61les temps de bon fonctionnement de la
+comprimeuse04
+66Estimation des paramètres du modèle de weibull
+et son test de kolmogrovsmirnov05
+87L’état des machines de fabrication et de
+conditionnement des comprimés0621/22
+Liste des figures
+PageIntituléN°
+22Évolution d’un compte courant financer par une
+facilité de caisse
+01
+24Représentation des indicateurs d’équilibre financier02
+29Organigramme générale de la Banque Nationale
+d’Algérie
+03
+37La fonction de densité de probabilité de défaillance04
+48La fonction de défaillance05
+68La fonction de fiabilité de la comprimeuse06
+75La fonction de densité de probabilité0722/22

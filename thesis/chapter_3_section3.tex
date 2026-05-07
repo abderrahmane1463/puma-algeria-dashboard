@@ -1,0 +1,111 @@
+\documentclass[12pt,a4paper]{report}
+\usepackage[utf8]{inputenc}
+\usepackage[english]{babel}
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{amssymb}
+\usepackage{graphicx}
+\usepackage{hyperref}
+\usepackage{booktabs}
+\usepackage{float}
+\usepackage{geometry}
+\usepackage{setspace}
+\usepackage{caption}
+\usepackage{subcaption}
+\usepackage{titlesec}
+\usepackage[T1]{fontenc}
+\usepackage[scaled=0.92]{helvet} 
+\renewcommand{\familydefault}{\sfdefault}
+
+% Aligning rigorously with the ENSSEA standard
+\geometry{margin=2.5cm, left=3cm} 
+\setstretch{1.5}
+
+\titleformat{\section}
+  {\normalfont\Large\bfseries}{\thesection \ - }{1em}{}
+\titleformat{\subsection}
+  {\normalfont\large\bfseries}{\thesubsection \ - }{1em}{}
+\titleformat{\subsubsection}
+  {\normalfont\normalsize\bfseries\underline}{\thesubsubsection \ - }{1em}{}
+
+\begin{document}
+
+\setcounter{chapter}{3} 
+\setcounter{section}{2}
+
+% -----------------------------------------------------------------------------
+\section{Sales Forecasting and Result Discussion}
+
+\subsection{Forecasting Models: SARIMA, Prophet, XGBoost and Random Forest}
+While individual behavioral tracking securely stabilizes long-term strategic relationships, operational inventory logistics require absolute precision regarding aggregate systemic volume. Physical enterprise structures cannot dynamically generate inventory; therefore, global daily revenue requires algorithmic forecasting. Predicting precise volumetric logistical loads operates as the primary safeguard for alleviating supply chain bloat (capital sink) and actively minimizing catastrophic "out-of-stock" occurrences during peak seasonal convergence\footnote{Chopra, S. \& Meindl, P. : \textit{Supply Chain Management: Strategy, Planning, and Operation}, Pearson, New Jersey, 2016, p. 195.}. 
+
+To resolve continuous global daily prediction, three mathematically disparate structural paradigms were formulated within the pipeline architecture natively processing the \texttt{build\_daily\_series(sales)} outputs. Prior to training initialization, the raw sequential dataset underwent aggressive temporal smoothing, natively filling missing sequence dates fundamentally anchoring \textit{Zero Revenue} parameters explicitly to preserve structural chronology (`daily.reindex(fill_value=0)`).
+
+\subsubsection{1. SARIMA (Seasonal Autoregressive Integrated Moving Average)}
+The SARIMA algorithm represents a purely statistical methodology executing outside the domain of supervised learning bounds\footnote{Box, G. E. P. \& Jenkins, G. M. : \textit{Time Series Analysis: Forecasting and Control}, Holden-Day, San Francisco, 1970, p. 112.}. Rather than hunting for non-linear multidimensional patterns, SARIMA forces stationarity upon non-stationary continuous variables utilizing fractional differencing functions, sequentially mapping variance utilizing Auto-Regressive (AR) components mapping past variables, alongside Moving Averages (MA) mapping explicit error residuals.
+
+The Python framework executed \textit{Pmdarima}'s \texttt{auto\_arima} module. This explicitly commands an exhaustive algorithmic grid search resolving against the Akaike Information Criterion (AIC) parameter, fundamentally penalizing models inheriting excessive complexity. To capture the explicit right-skewness of Algerian retail spikes, the module natively passed \texttt{seasonal=True, m=7}. The algorithmic optimization locked exactly onto a $(2, 1, 2) \times (1, 0, 1, 7)$ mathematical dimension. The implementation of the explicit integer $s=7$ mathematically dictates the algorithm to strictly anticipate absolute weekend retail surges sequentially repeating every seven continuous units.
+
+\subsubsection{2. Prophet (Meta Algorithm)}
+Originally engineered privately by Facebook’s Data Science logistics team, Prophet operates fundamentally on an additive regression equation specifically designed structurally resilient against missing temporal data arrays:
+\begin{equation}
+    y(t) = g(t) + s(t) + h(t) + \epsilon_t
+\end{equation}
+where $g(t)$ controls the logarithmic trend trajectory utilizing localized changepoints, $s(t)$ isolates the harmonic sequences modeling nested periodic shifts, and $h(t)$ incorporates irregular, mathematically disruptive explicit external holidays\footnote{Taylor, S. J. \& Letham, B. : \textit{Forecasting at Scale}, The American Statistician, 72(1), 2018, p. 38.}.
+
+The PUMA framework initialization parameterized the Prophet model specifically passing explicit Boolean constraints: \texttt{yearly\_seasonality=True, weekly\_seasonality=True, daily\_seasonality=False}. A specialized localized \texttt{changepoint\_prior\_scale=0.05} dictated the algorithm restricting excessive flexibility, enforcing structural rigidity protecting the model from overreacting violently against isolated localized anomaly liquidation events.
+
+\subsubsection{3. XGBoost (Extreme Gradient Boosting)}
+To structurally compare traditional mathematical time-series functions against advanced supervised learning, an Extreme Gradient Boosting component was introduced. XGBoost mathematically deviates fundamentally away from contiguous timeline dependencies, operating exclusively upon explicitly engineered sequential variable matrices feeding hundreds of parallelized ensemble decision trees. Each subsequent tree sequentially identifies and targets strictly the residual mathematical errors inherited from prior layers\footnote{Chen, T. \& Guestrin, C. : \textit{XGBoost: A Scalable Tree Boosting System}, KDD '16, ACM, 2016, p. 785.}.
+
+The Python programming (\texttt{build\_lag\_features}) fundamentally transformed the isolated temporal timeline into a supervised regression target column (\texttt{y}), actively generating independent regressors matching exactly: \texttt{lag7}, \texttt{lag14}, \texttt{lag28}, \texttt{rolling7}, and \texttt{rolling14}. The gradient boosting framework was locked explicitly at \texttt{n\_estimators=200} learning sequentially with an arbitrary limit setting continuous depth barriers at \texttt{max\_depth=4} to structurally resist model execution overfitting. Crucially, anticipating forward-looking unobserved time-sequences explicitly demanded the engineering of a rigorous \texttt{xgb\_recursive\_forecast} module, specifically designed mathematically to push fractional predicted \texttt{lag} values forward recursively day-by-day—since sequential "tomorrow" lag values technically do not exist natively.
+
+\subsection{Performance Comparison (RMSE, MAE, MAPE) and Optimal Selection}
+Forecasting performance was structurally forced to validate parameters independently against a withheld explicit testing horizon defining identically sequential dates completely foreign functionally to the model's initialization environment.
+
+Mathematical calibration historically utilizes the Root Mean Squared Error (RMSE). For volatile aggressive retail ecosystems constantly subjected randomly to massive, anomalous logistical liquidation sales, heavily depending mathematically upon the Root Mean Squared Error (RMSE) mechanism is structurally detrimental. RMSE physically exponentially squares the error margins, arbitrarily generating massive punishing parameters simply because an algorithm logically fails perfectly anticipating totally unparalleled anomalies. Consequently, \textbf{Mean Absolute Error (MAE)} provided definitively superior, steady absolute error tracking reliability and served exclusively as the absolute evaluation metric.
+
+The 60-day parallel test sequence definitively validated the following empirical deviations:
+\begin{table}[H]
+    \centering
+    \begin{tabular}{lc}
+    \toprule
+    \textbf{Forecasting Model} & \textbf{Mean Absolute Error (MAE)} \\
+    \midrule
+    \textbf{SARIMA (2, 1, 2)x(1, 0, 1, 7)} & \textbf{792,505 DZD} \\
+    XGBoost Ensemble Regression & 1,307,945 DZD \\
+    Prophet (Additive Meta Framework) & 3,391,047 DZD \\
+    \bottomrule
+    \end{tabular}
+    \caption{Tableau N°02 : Cross-Platform Model Performance Comparison measured across the 60-Day Testing Horizon.}
+    \label{tab:mae_comparison}
+\end{table}
+\vspace{-0.5cm}
+\begin{center}
+    \footnotesize{\textit{Source : Statsmodels / XGBoost Integrated Output Logs, PUMA Dataset 2026.}}
+\end{center}
+
+\textbf{Comprehensive Results Assessment}: 
+The resulting MAE explicitly demonstrates the unmitigated absolute superiority possessed natively by the \textbf{SARIMA} framework, generating definitively an intensely minimized margin holding global errancy beneath $800,000$ DZD variance functionally per recorded rotation. The reasoning operating intrinsically behind this performance lies deeply entrenched inside the explicit mathematical frequency representing the North African physical commercial reality. 
+
+Prophet completely fractures under continuous short-sequence high-frequency amplitudes. While structurally superior operating upon tracking smooth digital traffic parameters, it reacts exceedingly slowly navigating physical environments operating via brutal oscillation—where massive continuous Friday volumes abruptly transition immediately descending toward desolate Sunday troughs. Prophet averages this variation generating a lethal $3.3$ Million DZD variance. XGBoost successfully absorbed the pattern relying heavily on the exact \texttt{lag7} isolated integer mapping, restricting variance tightly towards $1.3$ M DZD. However, it structurally struggles mapping predictions extrapolating temporally outside the limits established natively by the strict training distribution bounds. 
+Conversely, SARIMA’s explicit Auto-Arima optimization executing explicitly the $(1,0,1,7)$ variable allowed it fundamentally to permanently internalize the high-frequency shapes defining algorithmic weekend volume dynamics organically.
+
+\subsection{Consolidated Results and Managerial Recommendations}
+The ultimate translation converging precisely the 35,696 isolated Segment profiles mapped seamlessly against intersecting explicitly probability functions, clustered directly via unobserved variables, and predicted entirely upon an explicit SARIMA $1.0\times10^0$ volume mapping, physically pivots SARL Great Way operations completely. Transforming inherently analytical data science variables explicitly into actionable, rigid strategic frameworks constitutes definitively the final stage. The following structural frameworks constitute our ultimate explicitly verified managerial recommendations:
+
+\begin{enumerate}
+    \item \textbf{Anticipatory Inventory Staging Logistics}: Relying logistically on reporting physical out-of-stock anomalies essentially guarantees continuous lost enterprise revenue. Integrating SARIMA's 30-day algorithmic predictive parameters—leveraging explicitly the mapped upper and lower deviation confidence bands—warehouse dispatching managers must fundamentally physically alter internal logistics arrays. Logistics schedules must stagger immediately prior to continuous volume explosions (specifically routing major dispatch units structurally upon Wednesdays). Stores natively fully loaded with proportional volumes immediately prior to the strict Friday algorithmic convergence effectively secures absolute optimization, generating physical capacity matching mathematical prediction precisely.
+    \item \textbf{Decentralization of Budget via $P(\text{Alive})$}: Traditional generalized mass SMS / advertising marketing executes fundamentally blind distributions. Leveraging specifically the structurally defined Median Baseline yield ($11,044$ DZD), advertising executives are fundamentally banned allocating generalized expenditures tracking statistically dead clients identified explicitly possessing continuous tracking $P(\text{Alive}) < 0.2$. Operational marketing budget explicitly redirects immediately toward the probabilistic "At Risk" parameters. 
+    \item \textbf{Maximizing Cluster Density Conversions}: Unsupervised logic vectors define exactly massive continuous demographic density clusters located centrally within the bounds representing the K-Means "Promising" parameter. The actors fundamentally exhibit relatively tight Recency matrices but lack rigorous continuous habit loops. Directly engaging specifically this internal dimension segment deploying variable gamified behavioral discounting will continuously draw those spatial coordinates forcefully toward the "Champions" origin vector. Initiating transitional behavioral acceleration from mid-tier fractional LTV explicitly towards upper-bound thresholds continuously provides substantially superior margin returns exponentially scaling higher than pure generic "New Customer" continuous acquisition.
+\end{enumerate}
+
+\section*{Conclusion of Chapter III}
+\addcontentsline{toc}{section}{Conclusion of Chapter III}
+This definitive final volume completes Chapter III, successfully achieving the structural validation of the primary foundational thesis hypothesis: data-driven CRM infrastructure, explicitly grounded in mathematical statistics and machine learning probabilities, natively supersedes traditional human intuition-based administration within retail logistics structures.
+
+Through the meticulous processing of PUMA Algeria's explicitly defined historical dataset, we successfully executed a rigorous programmatic sequence beginning intimately with massive localized data pre-processing, string conversions, and Boolean negative-volume return purging. By logically categorizing massive subsets into explicit strictly bounded heuristic thresholds, alongside unsupervised K-Means Euclidean distributions mapping normalized continuous values, we securely validated exactly 8,562 repeat loyalists. The execution of explicitly filtered fractional probabilistic models achieved isolating precise conditional behaviors generating an exact structural Baseline Median output yield defined explicitly at roughly 11,000 DZD per repeat buyer. 
+
+Concurrently, executing comprehensive sequential time-series matrices definitively validated SARIMA’s Auto-regressive architecture outperforming additive baseline Meta structures by recording vastly robust MAE tolerances tracking beneath 800-thousand margins per daily oscillation interval. The completion of this pipeline specifically translates passive ERP historical ledgers aggressively into highly proactive algorithmic forecasting dashboards, immediately equipping executive management operating inside SARL Great Way intimately with actionable, continuous explicit intelligence explicitly required traversing successfully modern commercial uncertainty.
+
+\end{document}

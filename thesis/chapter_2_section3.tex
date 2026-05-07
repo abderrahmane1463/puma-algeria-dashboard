@@ -1,0 +1,75 @@
+\documentclass[12pt,a4paper]{report}
+\usepackage[utf8]{inputenc}
+\usepackage[english]{babel}
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{amssymb}
+\usepackage{graphicx}
+\usepackage{hyperref}
+\usepackage{booktabs}
+\usepackage{float}
+\usepackage{geometry}
+\usepackage{setspace}
+\usepackage{caption}
+\usepackage{subcaption}
+\usepackage{titlesec}
+\usepackage[T1]{fontenc}
+\usepackage[scaled=0.92]{helvet} 
+\renewcommand{\familydefault}{\sfdefault}
+
+% Aligning rigorously with the ENSSEA standard
+\geometry{margin=2.5cm, left=3cm} 
+\setstretch{1.5}
+
+\titleformat{\section}
+  {\normalfont\Large\bfseries}{\thesection \ - }{1em}{}
+\titleformat{\subsection}
+  {\normalfont\large\bfseries}{\thesubsection \ - }{1em}{}
+\titleformat{\subsubsection}
+  {\normalfont\normalsize\bfseries\underline}{\thesubsubsection \ - }{1em}{}
+
+\begin{document}
+
+\setcounter{chapter}{1} % Sets chapter to 2
+\setcounter{section}{2} % Begins section 2.3
+
+% -----------------------------------------------------------------------------
+\section{Internship Framework : SARL APPAREL (PUMA Algeria)}
+
+\subsection{Company Presentation: History, Activity and Strategic Positioning}
+The empirical manifestations of mathematical models only achieve validity when anchored directly into a concrete organizational reality. The professional immersion characterizing this research was conducted within \textbf{SARL Apparel}, the exclusive official authorized distributor of the global conglomerate \textbf{PUMA} in Algeria. 
+
+Founded with a presence in the national sports sector since 2010, Apparel originally operated as a partner for several major international brands. However, a significant strategic pivot occurred in \textbf{2018}, when the enterprise decided to specialize exclusively in the distribution and brand representation of PUMA on the Algerian territory\footnote{Rapport de Stage: \textit{Découverte du milieu professionnel au sein de SARL Apparel}, IFAG, 2021, p. 5.}. 
+
+Today, SARL Apparel manages the entire value chain of the brand locally, encompassing brand image management, multi-channel distribution (B2B and B2C), and a growing E-commerce presence. The company's strategic positioning is anchored on exactly transcribing PUMA's global "Forever Faster" strategy onto the national national territory, ensuring the guarantee of authentic, high-quality products while aggressively developing its retail footprint through the opening of specialized stores.
+
+\subsection{Competitive Environment and the Algerian Retail Context}
+The Algerian footwear and clothing industry represents a mature yet volatile sector that has seen numerous brands emerge and vanish over the last two centuries. In this competitive landscape, SARL Apparel has carved a dominant position by focusing on a "short circuit" strategy, prioritizing direct contact and satisfaction of the end customer.
+
+The market environment is characterized by several key dynamics:
+\begin{enumerate}
+    \item \textbf{Category Dominance}: Within the PUMA portfolio, the \textit{Footwear} segment represents the absolute engine of growth, accounting for over \textbf{45\% of the company's total turnover}. This concentration highlights the necessity for precise stock management and forecasting within this specific category.
+    \item \textbf{Digital Shift}: Since July 2020, the company has accelerated its digital transformation, notably through its presence on the \textit{Madina.dz} platform, reaching a diverse target audience of men, women, and children across the country.
+    \item \textbf{Socio-Economic Factors}: Despite a relatively low purchasing power in certain segments, there is a marked increase in monthly spending on quality footwear, driven by a youthful population that is highly sensitive to international brand prestige.
+\end{enumerate}
+
+\subsection{Field Problem: Available Data, Analytical Needs and Study Scope}
+Despite its structured organization—comprising specialized departments in Finance, IT, Logistics, and Marketing—SARL Apparel faces a common challenge in the modern retail era: the transition from "data collection" to "predictive intelligence."
+
+\textbf{Analytical Needs}: The company’s primary objective, as stated in its corporate missions, is to "respond to customer expectations and satisfy them by exploiting all distribution channels." While the SAP/ERP system successfully logs over 180,000 transaction lines annually, these records have historically remained retrospective. There is an urgent analytical need to anticipate customer behavior rather than merely observing it after the purchase.
+
+\textbf{Périmètre de l'étude (Scope)}:
+The scope of this research is specifically designed to bridge this gap. By utilizing the 35,696 unique customer profiles identified in the database, our study aims to:
+\begin{itemize}
+    \item \textbf{Quantify Loyalty}: Moving beyond simple sales tracking to calculate the latent value of each customer through the BG/NBD and Gamma-Gamma models.
+    \item \textbf{Optimize Distribution}: Using SARIMA and XGBoost forecasting to ensure that PUMA's retail and e-commerce channels are never hindered by out-of-stock crises during peak demand.
+    \item \textbf{Decision Support}: Providing management with an interactive Executive Dashboard that summarizes these complex mathematical vectors into actionable business directives.
+\end{itemize}
+
+\section*{Conclusion of Chapter II}
+\addcontentsline{toc}{section}{Conclusion of Chapter II}
+Chapter II has successfully established the theoretical and organizational framework required to justify the deployment of advanced analytics within SARL Apparel. By examining the literature, we have seen how segmentation, CLV, and forecasting are not isolated metrics but an integrated ecosystem of enterprise survival. 
+
+The transition from the foundational works of RFM and K-Means towards our specific field problematic at PUMA Algeria confirms that "Data is the new oil" only if it is refined through proper methodology. Having identified the company's strategic positioning and the analytical gaps in its current workflow, we are now equipped to transition into Chapter III, where these theoretical hypotheses will be subjected to the rigor of empirical testing and algorithmic validation.
+
+\end{document}

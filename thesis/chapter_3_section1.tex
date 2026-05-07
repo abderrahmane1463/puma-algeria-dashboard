@@ -1,0 +1,85 @@
+\documentclass[12pt,a4paper]{report}
+\usepackage[utf8]{inputenc}
+\usepackage[english]{babel}
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{amssymb}
+\usepackage{graphicx}
+\usepackage{hyperref}
+\usepackage{booktabs}
+\usepackage{float}
+\usepackage{geometry}
+\usepackage{setspace}
+\usepackage{caption}
+\usepackage{subcaption}
+\usepackage{titlesec}
+\usepackage[T1]{fontenc}
+\usepackage[scaled=0.92]{helvet} 
+\renewcommand{\familydefault}{\sfdefault}
+
+\geometry{margin=2.5cm, left=3cm} 
+\setstretch{1.5}
+
+\titleformat{\chapter}[display]
+  {\normalfont\huge\bfseries\centering}{\chaptertitlename\ \thechapter}{20pt}{\Huge}
+\titleformat{\section}
+  {\normalfont\Large\bfseries}{\thesection \ - }{1em}{}
+\titleformat{\subsection}
+  {\normalfont\large\bfseries}{\thesubsection \ - }{1em}{}
+\titleformat{\subsubsection}
+  {\normalfont\normalsize\bfseries\underline}{\thesubsubsection \ - }{1em}{}
+
+\begin{document}
+
+\setcounter{chapter}{2} % Sets chapter to 3
+\chapter{METHODOLOGY, EMPIRICAL APPLICATION AND RESULTS}
+
+\section*{Introduction of Chapter III}
+\addcontentsline{toc}{section}{Introduction of Chapter III}
+This chapter represents the empirical sequence and technical culmination of this Master's thesis. It serves as the definitive bridge between the abstract, theoretical frameworks of algorithmic Customer Relationship Management (CRM)—introduced strictly in the preceding literature review—and the highly volatile, concrete operational challenges existing within the modern sportswear retail domain. Operating explicitly within the commercial context of SARL Great Way—the official national distributor of PUMA in Algeria—this chapter systematically subjects high-dimensional, proprietary commercial data to an array of advanced statistical mechanisms, machine learning architectures, and interactive digital visualization systems.
+
+The primary objective of this empirical empirical projection is transformational: to definitively prove that migrating an enterprise from archaic, intuition-based mass marketing toward highly targeted algorithmic intelligence mathematically maximizes Customer Lifetime Value (CLV). Crucially, this thesis asserts that complex data science models—regardless of their mathematical superiority—are functionally useless if they remain isolated within terminal outputs or remain inaccessible to corporate decision-makers. Therefore, parallel to the probabilistic equations, this chapter details the complete engineering of a locally hosted, interactive web application (The PUMA CRM Executive Dashboard). This digital product structurally translates algorithmic vectors (such as K-Means spatial limits and fractional Gamma distributions) into immediate, visually intuitive managerial directives rendered in real-time.
+
+This specific section addresses the foundational cornerstone of the empirical study: Industrial Data Engineering. Section 3.1 provides an exhaustive, granular breakdown of the methodological stance, the exact Python software architecture designed for the dashboard application (`app.py`), the anatomy of the primary dataset extracted from PUMA's internal Enterprise Resource Planning (ERP) databases, and the exceedingly rigorous computational pre-processing required to sanitize the baseline DataFrame matrix prior to any machine learning initialization.
+
+% -----------------------------------------------------------------------------
+\section{Methodological Approach and Data Pre-processing}
+
+\subsection{Epistemological Positioning, Quantitative Approach and Software Tools}
+In complete structural alignment with the predictive objectives of this thesis, a \textit{positivist} epistemological stance was rigorously and exclusively adopted. Positivism asserts that absolute, objective knowledge concerning human behavior is derived exclusively through the empirical observation of explicitly measurable variables, isolated entirely from corporate subjectivity or qualitative bias\footnote{Saunders, M., Lewis, P. \& Thornhill, A. : \textit{Research Methods for Business Students}, Pearson, London, 2019, p. 136.}. Consequently, the fundamental paradigm deployed in this thesis mathematically assumes that latent Algerian consumer psychology, localized brand loyalty, and shifting micro-market momentum can be fully mapped, structurally measured, and temporally predicted exclusively through the analysis of historical, numerical transactional footprints.
+
+Operating under a highly quantitative, hypothetico-deductive framework, the study formulated explicit algorithmic hypotheses—such as determining whether unsupervised spatial algorithms can outperform generalized heuristic rules—and tested them programmatically via algorithmic execution. To execute this complex architecture against a massive volume of commercial interactions without hardware limitations, an industrial-grade open-source software stack was developed entirely from scratch in \textbf{Python 3}. The selection of Python over purely theoretical statistical languages (such as R or SAS) was driven entirely by its unparalleled supremacy in production-level engineering and pipeline scalability. The entire methodology relies upon a highly customized digital ecosystem built within the workspace, separated distinctly into configuration files (`config.py`), execution scripts (`train_models.py`), and front-end rendering (`app.py`).
+
+The explicit dependencies invoked within the systemic architecture include:
+\begin{itemize}
+    \item \textbf{Streamlit (Web Framework)}: A revolutionary Python library leveraged to construct the Graphical User Interface (GUI). By engineering the primary architecture using Streamlit, the raw algorithms were embedded seamlessly into a fully interactive, multi-tabbed web dashboard. Custom CSS parameters dictating font weights, padding geometries, and dynamic hover effects were utilized to force a persistent "Dark Theme". This user experience (UX) architectural decision aligns end-user psychology with premium PUMA aesthetics while highlighting critical Key Performance Indicators (KPI) asynchronously.
+    \item \textbf{Pandas and NumPy}: Served as the underlying mathematical engine supporting the memory arrays. These libraries provided in-memory DataFrame structures capable of high-performance vectorized boolean operations, allowing real-time mathematical aggregation of over hundreds of thousands of localized transactional vectors without triggering computational RAM (Random Access Memory) latency.
+    \item \textbf{Plotly}: Integrated natively into the Streamlit ecosystem to render complex, interactive graphical data visualizations. This specifically necessitated engineering three-dimensional (3D) scatter plot environments allowing PUMA executives to manually rotate, zoom, and visually dissect the structural K-Means cluster distances in spatial geometry.
+    \item \textbf{Scikit-Learn, Lifetimes \& Statsmodels}: The fundamental predictive backbone. \textit{Scikit-Learn} executed the spatial K-Means clustering and standardization scalers, \textit{Lifetimes} calculated the notoriously volatile non-contractual BG/NBD probability decay values, and \textit{Statsmodels} provided the auto-correlated SARIMA structural forecasting configurations necessary for supply-chain mapping.
+\end{itemize}
+
+\subsection{Description and Collection of Customer Transactional Data}
+The absolute foundation of this empirical study relies entirely upon a proprietary ERP spreadsheet array extracted by SARL Great Way, officially titled \textit{VENTES PUMA 2025.xlsx}. The raw Excel database encompasses a densely recorded history of daily sales records originating across varying geographical retail hubs (Boutiques) within the national Algerian network. 
+
+However, predicting human behavior utilizing machine learning algorithms cannot function natively on abstract, disconnected invoice strings. Statistical algorithms inherently require data structures to be transposed and aggregated around the concept of a single behavioral actor (The "Client"). Therefore, the deeply granular, invoice-line-level entries required rigorous systemic decomposition. The critical dimensions selected and isolated by the `load_raw` functions included:
+\begin{itemize}
+    \item \textbf{Temporal Index Features}: \texttt{Heure de création} (Exact Temporal Timestamp). The exact temporal moment a transaction is executed constitutes the entire mathematical foundation for establishing Recency ($R$) decay formulas and mapping structural time-series autocorrelation.
+    \item \textbf{Customer Metadata Constraints}: \texttt{Code Client} or \texttt{Client}. This categorical feature serves as the absolute primary key. It is a mandatory architectural requirement for linking disparate purchases occurring across fragmented temporal horizons (e.g., Spring versus Autumn) into a singular, recognizable human identity. Any transactional line lacking this identifier is statistically blind and mathematically useless for longitudinal evaluation.
+    \item \textbf{Item Disaggregation Codes}: Features explicitly mapping the material reality of the purchase, precisely \texttt{Etablissement} (Geographical Store Point), \texttt{Catégorie ligne doc} (PUMA Product Line Categories), and \texttt{Libellé article} (Item Description String). 
+    \item \textbf{Financial Yield Dimensions}: The final outputs driving profitability: \texttt{Prix unitaire TTC} (Unit Sale Price), \texttt{Qté facturée} (Physical Volume), \texttt{Total TTC ligne} (Total Margin Revenue). These continuous integer and float variables establish the monetary elasticity bounding systemic value allocation across segments.
+\end{itemize}
+
+Through programmatic loading configurations actively utilizing Streamlit's `@st.cache_data` memory caching decorators, the massive Excel file was successfully ported entirely into the localized environment without crashing the local workspace buffer. Out of hundreds of thousands of individual scanned items, the Python codebase successfully aggregated and accurately compressed the interactions to define an operable, highly active behavioral universe consisting precisely of \textbf{35,696 unique customers}\footnote{McKinney, W. : \textit{Data Structures for Statistical Computing in Python}, Proceedings of the 9th Python in Science Conference, 2010.}.
+
+\subsection{Cleaning, Feature Engineering and Exploratory Data Analysis (EDA)}
+A foundational, unforgiving axiom of data science asserts the principle of "Garbage In, Garbage Out." The most sophisticated mathematical algorithm trained on corrupted dataset anomalies will invariably generate highly sophisticated, confident errors. Consequently, the first active empirical phase dictated by the pipeline—housed precisely within the `clean_data(df: pd.DataFrame)` function sequence—involved extremely aggressive data wrangling, algorithmic sanitization, and complex datetime feature engineering.
+
+Initially, financial arrays exported directly from the French-localized SAP/ERP logistics systems inherently contained culturally localized string formats plagued by visual delimiters (e.g., blank spaces improperly acting as thousands separators, and commas substituting American demographic decimal points). If left untouched, `pandas` interprets these arrays as meaningless text (`object` DType). Utilizing a customized parsing algorithm (`_clean_currency`), these textual anomalies were computationally scrubbed, mathematically replacing syntax spaces (`str.replace(" ", "")`) and forcibly coercing the resulting structures strictly into standardized 64-bit numerical arrays (`pd.to_numeric(errors='coerce')`). Following this operation, the primary yield column was cleanly renamed into the standard target variable `Revenue`.
+
+A highly critical, non-negotiable step of the initial data sanitization parameters involved the mathematical isolation, identification, and subsequent elimination of logistical \textit{Returns}. In generalized retail databases, a returned item is historically logged automatically as a standard transaction occurring identically to a physical purchase, solely distinguished by presenting a negative physical volume parameter resulting in negative revenue margins (e.g., \texttt{Qty < 0}). A failure to aggressively recognize and mathematically reverse these specific rows generates catastrophic algorithmic failures downstream. For theoretical example, a customer returning a pair of defective shoes generates an independent time-scan barcode; if the model fails to sanitize this, the machine learning algorithm blindly tags this activity as an additional distinct "Purchase". This profoundly fractures the RFM logic by falsely training the CRM logic that a client actively returning apparel is actually a highly loyal "Champion" repeat purchaser possessing elevated Recency and Frequency scores. The Python architecture cleanly, mathematically bypassed this via boolean masking constraints. By engineering the variable \texttt{df['Is\_Return'] = df['Qty'] < 0}, the primary sales matrix was instantly scrubbed: \texttt{sales = df[(df['Is\_Return'] == False) \& (df['Revenue'] > 0)]}. In this identical phase, any anonymous transaction lacking a recognizable demographic identifier was systematically dropped employing \texttt{df.dropna(subset=['Client'])}.
+
+Following stringent boolean sanitization, an advanced sequence of \textbf{Temporal Feature Engineering} was securely initialized. Leveraging the massive utility locked out within the localized Date variables, the initial DataFrame was structurally expanded significantly. Time-based cyclical regressors were natively synthesized utilizing Pandas `.dt` indexers. The algorithm autonomously generated granular dimensions: \texttt{df['Year']}, \texttt{df['Month']}, \texttt{df['Hour']}, and crucially \texttt{df['Week'] = df['Heure de création'].dt.isocalendar().week}. The implementation of the explicit `.isocalendar()` method is pivotal, as it mathematically standardizes algorithmic processing spanning year-end anomalies, assuring statistical forecasting robustness against December-to-January crossover structural drift. Finally, an explicit Boolean algorithmic classification tagging the Algerian \textit{Weekend} architecture (Fridays and Saturdays) was constructed to inject explicit supervised learning logic specifically designed to aid time-series peak-mapping algorithms trailing later sequentially in the testing pipeline.
+
+The subsequent deployment of the interactive Streamlit Dashboard's built-in Exploratory Data Analysis (EDA) plotting logic immediately confirmed several profound, underlying structural economic truths concerning PUMA's Algerian demographic audience. Firstly, plotted histograms calculating density distributions revealed that the absolute majority of independent retail actors hover precariously as "one-time" anonymous purchasers. This structural reality acutely triggers the exact necessity for engineering explicitly controlled "At Risk" and "New Customer" heuristic scoring thresholds applied sequentially. Secondly, the macro-demand plotting curves forcefully illustrated the absolute non-stationarity of the global daily transactions. Volumetric daily revenue structurally plateaus throughout mid-week durations (Mondays descending into Wednesdays) prior to erupting in inherently violent, high-density cyclical spikes overwhelmingly concentrated across the explicit Friday and Saturday engineered variables. Uncovering this exceptionally severe degree of cyclical magnitude actively immediately justified the absolute theoretical necessity for discarding simple moving averages, pivoting definitively towards Auto-Regressive statistical frameworks (SARIMA) fully capable of mathematically inheriting continuous memory regarding repeating historical shock anomalies.
+
+\end{document}
