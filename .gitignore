@@ -1,0 +1,32 @@
+# ── Data files — NEVER push raw customer data ──────────────────────────────
+*.xlsx
+*.xls
+*.csv
+
+# ── Pre-computed artifacts — generated locally by train_models.py ───────────
+artifacts/
+
+# ── Python cache ────────────────────────────────────────────────────────────
+__pycache__/
+*.py[cod]
+*.pyo
+.pytest_cache/
+
+# ── Virtual environments ─────────────────────────────────────────────────────
+venv/
+.venv/
+env/
+
+# ── Jupyter / IDE ────────────────────────────────────────────────────────────
+.ipynb_checkpoints/
+*.ipynb
+.vscode/
+.idea/
+
+# ── OS junk ──────────────────────────────────────────────────────────────────
+.DS_Store
+Thumbs.db
+
+# ── Secrets ──────────────────────────────────────────────────────────────────
+.env
+secrets.toml

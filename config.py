@@ -29,6 +29,7 @@ GGF_MODEL        = MODELS_DIR / 'ggf_model.pkl'
 SARIMA_FIT       = MODELS_DIR / 'sarima_fit.pkl'
 PROPHET_MODEL    = MODELS_DIR / 'prophet_model.pkl'
 XGB_FORECAST     = MODELS_DIR / 'xgb_forecast.pkl'
+RF_FORECAST      = MODELS_DIR / 'rf_forecast.pkl'
 
 # ══ Constants ═════════════════════════════════════════════════════════════════
 SNAPSHOT_DATE    = '2026-01-02'    # Fixed reference date for RFM recency
@@ -83,13 +84,14 @@ MODEL_COLORS = {
     'SARIMA' : '#e74c3c',
     'Prophet': '#3498db',
     'XGBoost': '#2ecc71',
+    'RF'     : '#9b59b6',
 }
 
 # ══ Segment orders (for consistent axis ordering) ═════════════════════════════
 SEG_ORDER_5     = ['Champions', 'Loyal Customers', 'New Customers', 'At Risk', 'Lost']
 SEG_ORDER_KM    = ['Champions', 'Promising', 'At Risk', 'Dormant']
 TIER_ORDER      = ['High CLV', 'Medium CLV', 'Low CLV']
-MODEL_ORDER     = ['SARIMA', 'Prophet', 'XGBoost']
+MODEL_ORDER     = ['SARIMA', 'Prophet', 'XGBoost', 'RF']
 
 # ══ K-Means segment names (ranked by mean RFM_Score descending) ═══════════════
 KMEANS_SEGMENT_NAMES = ['Champions', 'Promising', 'At Risk', 'Dormant']

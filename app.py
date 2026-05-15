@@ -1,5 +1,5 @@
 # ═══════════════════════════════════════════════════════════════════════════════
-#  PUMA Algeria — AI-Driven Customer Intelligence & Demand Forecasting Dashboard
+#  PUMA Algeria — AI-Driven Customer Intelligence & Sales Forecasting Dashboard
 #  Master's Thesis | SARL Great Way | Statistics & Data Science
 #
 #  Launch:  streamlit run app.py
@@ -9,6 +9,7 @@
 import warnings
 warnings.filterwarnings("ignore")
 
+import base64
 import json
 import pickle
 from pathlib import Path
@@ -116,6 +117,16 @@ st.markdown("""
   ::-webkit-scrollbar-track { background:#1A1A1A; }
   ::-webkit-scrollbar-thumb { background:#FF0000; border-radius:3px; }
   [data-testid="stExpander"] { background:#1A1A1A !important; border:1px solid #2A2A2A !important; border-radius:4px !important; }
+  /* ── Multiselect dropdown: cap height & scroll internally ── */
+  [data-baseweb="popover"] ul[role="listbox"] {
+    max-height: 200px !important;
+    overflow-y: auto !important;
+    scrollbar-width: thin;
+    scrollbar-color: #FF0000 #1A1A1A;
+  }
+  [data-baseweb="popover"] ul[role="listbox"]::-webkit-scrollbar { width: 5px; }
+  [data-baseweb="popover"] ul[role="listbox"]::-webkit-scrollbar-track { background: #1A1A1A; }
+  [data-baseweb="popover"] ul[role="listbox"]::-webkit-scrollbar-thumb { background: #FF0000; border-radius: 3px; }
 </style>
 """, unsafe_allow_html=True)
 
@@ -124,6 +135,16 @@ st.markdown("""
 
 def fmt(value, suffix=" DZD"):
     """Format number with thousand separators."""
+    return f"{value:,.0f}{suffix}"
+
+
+def fmt_currency(value, suffix=" DZD"):
+    """Human-readable currency: ≥1 M → 'X.X M DZD', ≥1 K → 'X.X K DZD', else raw."""
+    abs_val = abs(value)
+    if abs_val >= 1_000_000:
+        return f"{value / 1_000_000:.2f} M{suffix}"
+    if abs_val >= 1_000:
+        return f"{value / 1_000:.1f} K{suffix}"
     return f"{value:,.0f}{suffix}"
 
 
@@ -156,22 +177,28 @@ def puma_theme(title='', height=None):
     return layout
 
 
-# ── Artifact Loading ─────────────────────────────────────────────────────────
+# ══ Data Loading — three-tier strategy ═══════════════════════════════════════
+#
+#  Priority 1: st.session_state  → user just uploaded a file in this session
+#  Priority 2: on-disk artifacts → local dev (run train_models.py once first)
+#  Priority 3: show upload screen and stop
+#
+# This lets the same app.py work both locally (fast, disk-based) and on
+# Streamlit Community Cloud (no data in repo → upload required).
+# ─────────────────────────────────────────────────────────────────────────────
 
 @st.cache_resource
-def load_artifacts(bust_cache=False):
-    """Load all pre-trained artifacts. Returns dict."""
+def _load_disk_artifacts(bust_cache=None):
+    """Load pre-computed artifacts from disk. Returns dict or None."""
     required = [
-        cfg.DF_CLEAN, cfg.SALES_CLEAN, cfg.RFM_SCORED,
-        cfg.RFM_CLUSTERED, cfg.CLV_TABLE, cfg.DAILY_SALES,
-        cfg.FORECAST_TEST, cfg.KMEANS_META, cfg.CLV_META,
-        cfg.FORECAST_META, cfg.TRAINING_LOG,
+        cfg.DF_CLEAN, cfg.SALES_CLEAN, cfg.RFM_SCORED, cfg.RFM_CLUSTERED,
+        cfg.CLV_TABLE, cfg.DAILY_SALES, cfg.FORECAST_TEST, cfg.KMEANS_META,
+        cfg.CLV_META, cfg.FORECAST_META, cfg.TRAINING_LOG,
         cfg.SARIMA_FIT, cfg.PROPHET_MODEL, cfg.XGB_FORECAST,
         cfg.CLV_VALIDATION, cfg.BGF_MODEL,
     ]
-    missing = [str(p.name) for p in required if not p.exists()]
-    if missing:
-        return None, missing
+    if any(not p.exists() for p in required):
+        return None
 
     art = {}
     art['df_clean']      = pd.read_parquet(cfg.DF_CLEAN)
@@ -182,34 +209,97 @@ def load_artifacts(bust_cache=False):
     art['daily_sales']   = pd.read_parquet(cfg.DAILY_SALES)
     art['forecast_test'] = pd.read_parquet(cfg.FORECAST_TEST)
     art['clv_validation'] = pd.read_parquet(cfg.CLV_VALIDATION)
-
-    with open(cfg.KMEANS_META) as f:
-        art['kmeans_meta'] = json.load(f)
-    with open(cfg.CLV_META) as f:
-        art['clv_meta'] = json.load(f)
-    with open(cfg.FORECAST_META) as f:
-        art['forecast_meta'] = json.load(f)
-    with open(cfg.TRAINING_LOG) as f:
-        art['training_log'] = json.load(f)
-
-    art['bgf_model'] = pickle.load(open(cfg.BGF_MODEL, 'rb'))
-    art['sarima_fit'] = pickle.load(open(cfg.SARIMA_FIT, 'rb'))
+    with open(cfg.KMEANS_META)   as f: art['kmeans_meta']   = json.load(f)
+    with open(cfg.CLV_META)      as f: art['clv_meta']      = json.load(f)
+    with open(cfg.FORECAST_META) as f: art['forecast_meta'] = json.load(f)
+    with open(cfg.TRAINING_LOG)  as f: art['training_log']  = json.load(f)
+    art['bgf_model']     = pickle.load(open(cfg.BGF_MODEL,     'rb'))
+    art['sarima_fit']    = pickle.load(open(cfg.SARIMA_FIT,    'rb'))
     art['prophet_model'] = pickle.load(open(cfg.PROPHET_MODEL, 'rb'))
-    art['xgb_model'] = pickle.load(open(cfg.XGB_FORECAST, 'rb'))
+    art['xgb_model']     = pickle.load(open(cfg.XGB_FORECAST,  'rb'))
+    art['rf_model']      = (pickle.load(open(cfg.RF_FORECAST,  'rb'))
+                            if cfg.RF_FORECAST.exists() else None)
+    return art
 
-    return art, []
+
+def _show_upload_screen():
+    """Render the data-upload landing page."""
+    st.markdown("""
+    <div style="text-align:center;padding:50px 20px 30px 20px;">
+      <div style="font-size:56px;font-weight:900;letter-spacing:12px;
+                  color:#FFFFFF;text-shadow:0 0 24px rgba(255,0,0,0.6);">
+        PUMA
+      </div>
+      <div style="width:60px;height:3px;background:#FF0000;
+                  margin:12px auto;border-radius:2px;"></div>
+      <div style="font-size:11px;letter-spacing:5px;color:#888;
+                  text-transform:uppercase;margin-bottom:28px;">
+        Algeria &middot; AI Customer Intelligence
+      </div>
+      <h2 style="color:#F5F5F5;font-weight:600;">Upload your sales data to launch the dashboard</h2>
+      <p style="color:#9A9A9A;font-size:1rem;max-width:560px;margin:16px auto 0 auto;">
+        Drop the <strong style="color:#F5F5F5;">VENTES PUMA 2025.xlsx</strong> ERP export below.
+        The full analytics pipeline — RFM segmentation, CLV modelling, and demand forecasting —
+        will run automatically. Your file is never stored anywhere.
+      </p>
+    </div>
+    """, unsafe_allow_html=True)
+
+    col_l, col_c, col_r = st.columns([1, 2, 1])
+    with col_c:
+        uploaded = st.file_uploader(
+            "Select Excel file",
+            type=['xlsx', 'xls'],
+            label_visibility="collapsed",
+            help="Raw ERP export from SARL GREAT WAY — stays private, never persisted.",
+        )
+
+        if uploaded is not None:
+            st.markdown("---")
+            st.info("📊 File received — running the full analytics pipeline. "
+                    "This takes **3–8 minutes** on first run. Please wait.")
+
+            progress_bar = st.progress(0.0)
+            status_txt   = st.empty()
+
+            def _on_step(label, pct):
+                progress_bar.progress(min(pct, 1.0))
+                status_txt.markdown(f"⚙️ &nbsp; **{label}**")
+
+            try:
+                import pipeline as pl
+                art = pl.run_full_pipeline(uploaded.read(), on_step=_on_step)
+                st.session_state['_puma_artifacts'] = art
+                status_txt.markdown("✅ &nbsp; **Pipeline complete — loading dashboard…**")
+                progress_bar.progress(1.0)
+                st.rerun()
+            except Exception as exc:
+                st.error(f"Pipeline failed: {exc}")
+                st.exception(exc)
+
+        st.markdown("""
+        <div style="margin-top:32px;padding:16px;background:#1A1A1A;
+                    border:1px solid #2A2A2A;border-radius:6px;
+                    color:#666;font-size:0.85rem;text-align:center;">
+          🔒 &nbsp;Your data is processed in memory only and is never saved to disk or shared.
+        </div>
+        """, unsafe_allow_html=True)
 
 
-# ── Check artifacts ──────────────────────────────────────────────────────────
-# Set bust_cache=True (or any new unique value) if you just updated the data pipeline
-artifacts, missing_files = load_artifacts(bust_cache="Refresh_v15_RestoreColors")
+# ── Resolve artifacts ────────────────────────────────────────────────────────
+if '_puma_artifacts' in st.session_state:
+    # Priority 1 — uploaded this session
+    artifacts = st.session_state['_puma_artifacts']
+else:
+    # Priority 2 — on-disk (local dev)
+    artifacts = _load_disk_artifacts(bust_cache="Refresh_v15_RestoreColors")
 
 if artifacts is None:
-    st.error(f"Artifacts not found: {', '.join(missing_files)}.\n\n"
-             "Please run `python train_models.py` first.")
+    # Priority 3 — show upload screen
+    _show_upload_screen()
     st.stop()
 
-# Unpack
+# ── Unpack ───────────────────────────────────────────────────────────────────
 df_clean      = artifacts['df_clean']
 sales_all     = artifacts['sales_clean']
 rfm_scored    = artifacts['rfm_scored']
@@ -224,6 +314,8 @@ training_log  = artifacts['training_log']
 sarima_fit    = artifacts['sarima_fit']
 prophet_model = artifacts['prophet_model']
 xgb_model     = artifacts['xgb_model']
+rf_model      = artifacts.get('rf_model')
+bgf_model     = artifacts['bgf_model']
 
 # Ensure date columns are proper types
 if 'Date_Only' in sales_all.columns:
@@ -231,19 +323,45 @@ if 'Date_Only' in sales_all.columns:
 if 'Date' in sales_all.columns:
     sales_all['Date'] = pd.to_datetime(sales_all['Date'], errors='coerce')
 
-bgf_model = artifacts['bgf_model']
-
 
 # ══ SIDEBAR ══════════════════════════════════════════════════════════════════
 
+_PUMA_LOGO_B64_PLACEHOLDER = (
+    "iVBORw0KGgoAAAANSUhEUgAAARMAAAC3CAMAAAAGjUrGAAAAjVBMVEXs7Ozt7e0AAADg4ODu7u7h4eHj4+Pl5eXb29vo"
+    "6Ojq6urf39/Y2NjV1dXy8vLR0dGQkJDGxsZkZGQxMTF5eXmIiIj29vbAwMCpqamjo6MsLCxaWlrMzMx1dXV/f3+e"
+    "np60tLRQUFAbGxsMDAyWlpY4ODhra2tBQUFAQEAmJiYWFhY2NjaFhYVMTExeXl7ZWuMDAAARzklEQVR4nO1dCXvb"
+    "qBYFs2hBxkk6T07bJE3bdDqdmfb//7zHIomLABnZsiN3QvOdgparo2t0D6AFhKoCE4QFVn+I4aLCDGGG1Z8q8apb"
+    "RzDimNfqf50luAYlgZUJtZMpqf0Cg3aFMWHNm1JnojM/GBTaoC3Z4xqDHA1W7MGseWIM6oPaLQvD1zc/lNBgvuId"
+    "C9aZ7w1ibRChlE9I5xNx0CeWZn2cT8SET0i2T6zB032ClvKJOMUnU/XkKn0icnxSHF1P4tdOAcwT6HLrE5F0+Tyf"
+    "cOMFoUlXlS7x/hRq56FCl7ixo45hSmoF73xidzKrrQnWbalL2P5Zn9gtmaY5mOddiXeOHMwbFoN5orcczA98seNr"
+    "XG5K1gQHpe642uWOL/L49vFEJaz/9DGwK5F0SZ0p2M+WcL8lgyV/nSINSsoL2CshwAIfZnGIL+DksxBeKcLXJSxg"
+    "GZN0CU2UrE8SW3JYqqOlfBYztvRZePuhKb5vPgn5LuWTqS1/L5+IiT0n9httyWb7JJvT5DqR65PRlooWSqepdcum"
+    "/CMdy3cd5/mW3tJbekv/1VRXb8lPNSoZIYxtfVT/TJ5YbDQKg2UZoNDYQCQa9a7HIRvyzKPWr21Yb78j1WFPivXU"
+    "LB1HkI2pMQIO1edLxChWiRgEeQryqv2pkupMqlRZrDQWFmuHqn/ZI2V4MENJKu8OS8Fhuzwk5SEeMKRWZFCLHAqQ"
+    "4l3P1fYVbVuQjPO2TW5bmlWhFxQWdbfadq4xrx0yNBiIoAjyLLFlSMQiAxhSq8bUiklqIjggO6NPEp65Ap/Yikhc"
+    "dYR5ROIV1Lt2QDUFFdQzljB/IJ9ae+q145kPkaGy0KkxWAYIlnOhkRkUBCAzm3CAU2Zm5yeRp6gxgBnU4AGF8gnn"
+    "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"
+)
+
 with st.sidebar:
     st.markdown("""
-    <div style="text-align:center;padding:16px 0 24px 0;">
-      <div style="font-family:'Barlow Condensed',sans-serif;font-size:32px;font-weight:800;
-                  color:#FF0000;letter-spacing:4px;">PUMA</div>
-      <div style="font-size:10px;letter-spacing:3px;color:#666;text-transform:uppercase;margin-top:2px;">
-        Algeria &middot; CRM Intelligence</div>
-      <div style="width:60px;height:2px;background:#FF0000;margin:10px auto 0 auto;"></div>
+    <div style="text-align:center;padding:28px 8px 20px 8px;">
+      <div style="font-size:42px;font-weight:900;letter-spacing:10px;
+                  color:#FFFFFF;text-transform:uppercase;
+                  text-shadow:0 0 18px rgba(255,0,0,0.5);">
+        PUMA
+      </div>
+      <div style="width:50px;height:3px;background:#FF0000;
+                  margin:10px auto 10px auto;border-radius:2px;"></div>
+      <div style="font-size:9px;letter-spacing:4px;color:#888888;
+                  text-transform:uppercase;">
+        Algeria &middot; CRM Intelligence
+      </div>
     </div>""", unsafe_allow_html=True)
 
     st.markdown("---")
@@ -304,12 +422,13 @@ with st.sidebar:
                                  default=[], placeholder="All types")
 
     forecast_days = st.slider("Forecast Horizon (days)", 7, 90, 30)
+    st.caption("ℹ️ Applies to the 📈 Sales Forecasting tab only.")
 
     st.markdown("---")
     trained_at = training_log.get('trained_at', 'Unknown')[:19]
     st.caption(f"**Models trained on:** {trained_at}")
     st.caption(f"**CLV:** BG/NBD + Gamma-Gamma (52 weeks)")
-    st.caption(f"**Forecast:** SARIMA + Prophet + XGBoost")
+    st.caption(f"**Forecast:** SARIMA + Prophet + XGBoost + RF")
 
 
 # ── Apply filters ────────────────────────────────────────────────────────────
@@ -334,8 +453,8 @@ st.markdown(f"""
               color:#FF0000;text-transform:uppercase;margin-bottom:4px;">
     <span class="badge">Live</span> SARL GREAT WAY &middot; MASTER'S THESIS{filter_label}
   </div>
-  <h1 style="margin:0;font-size:2.2rem;">AI-Driven Customer Intelligence &amp; Demand Forecasting</h1>
-  <div style="font-size:13px;color:#555;margin-top:4px;">
+  <h1 style="margin:0;font-size:2.2rem;">AI-Driven Customer Intelligence &amp; Sales Forecasting</h1>
+  <div style="font-size:13px;color:#AAAAAA;margin-top:4px;">
     PUMA Algeria &nbsp;&middot;&nbsp; {len(sales):,} transactions &nbsp;&middot;&nbsp; {active_days} active days
   </div>
 </div>""", unsafe_allow_html=True)
@@ -349,15 +468,15 @@ n_stores   = sales['Store'].nunique() if 'Store' in sales.columns else 0
 
 # Row 1: Primary Value Drivers
 k1, k2, k3 = st.columns(3)
-k1.metric("Total Revenue",  fmt(rev_total))
-k2.metric("Total Transactions", f"{n_trans:,}")
-k3.metric("Unique Customers", f"{n_cust:,}")
+k1.metric("Total Revenue",       fmt(rev_total),        delta="Period Total",    delta_color="off")
+k2.metric("Total Transactions",  f"{n_trans:,}",         delta="All ticket types", delta_color="off")
+k3.metric("Unique Customers",    f"{n_cust:,}",          delta="Active clients",  delta_color="off")
 
 # Row 2: Performance Metrics
 k4, k5, k6 = st.columns(3)
-k4.metric("Average Basket", fmt(avg_basket))
-k5.metric("Return Rate", f"{ret_rate:.1f}%")
-k6.metric("Active Stores", f"{n_stores}")
+k4.metric("Average Basket",      fmt(avg_basket),        delta="Per transaction", delta_color="off")
+k5.metric("Return Rate",         f"{ret_rate:.1f}%",     delta="Of all rows",     delta_color="off")
+k6.metric("Active Stores",       f"{n_stores}",           delta="Locations",       delta_color="off")
 
 st.markdown("<div class='section-header'></div>", unsafe_allow_html=True)
 
@@ -365,12 +484,13 @@ st.markdown("<div class='section-header'></div>", unsafe_allow_html=True)
 # ══ TAB DEFINITIONS ══════════════════════════════════════════════════════════
 
 tabs = st.tabs([
-    "EDA & Overview",
-    "RFM Analysis",
-    "K-Means Clustering",
-    "CLV (BG/NBD)",
-    "Demand Forecasting",
-    "Clients",
+    "📊 EDA & Overview",
+    "🎯 RFM Analysis",
+    "🤖 K-Means Clustering",
+    "💰 CLV (BG/NBD)",
+    "📈 Sales Forecasting",
+    "👥 Clients",
+    "📖 Documentation",
 ])
 
 
@@ -489,25 +609,33 @@ def render_eda(sales):
 
     c5, c6 = st.columns(2)
     with c5:
-        ct = sales['Client_Type'].value_counts().reset_index()
-        ct.columns = ['Type', 'Count']
+        ct = sales.groupby('Client_Type')['Revenue'].sum().reset_index()
+        ct.columns = ['Type', 'Revenue']
+        ct = ct.sort_values('Revenue', ascending=False)
+        total_rev = ct['Revenue'].sum()
+        ct['pct'] = ct['Revenue'] / total_rev * 100
+        ct['text'] = ct['pct'].apply(lambda p: f"{p:.1f}%" if p >= 5 else "")
         fig = go.Figure(go.Pie(
-            labels=ct['Type'], values=ct['Count'], hole=0.55,
+            labels=ct['Type'], values=ct['Revenue'], hole=0.55,
+            text=ct['text'], textinfo='text', textposition='inside',
             marker=dict(colors=['#e74c3c', '#e67e22', '#3498db', '#2ecc71'],
                         line=dict(color='#0D0D0D', width=2)),
-            textfont=dict(size=12),
-            hovertemplate='%{label}<br>Count: %{value:,}<br>Share: %{percent}<extra></extra>',
+            textfont=dict(size=12, color='#FFFFFF'),
+            hovertemplate='%{label}<br>Revenue: %{value:,.0f} DZD<br>Share: %{percent}<extra></extra>',
         ))
-        fig.update_layout(**puma_theme("Client Type Distribution", height=300))
-        fig.update_layout(legend=dict(orientation='h', y=-0.1))
+        fig.update_layout(**puma_theme("Revenue by Client Type", height=300))
+        fig.update_layout(legend=dict(orientation='h', y=-0.15))
         st.plotly_chart(fig, use_container_width=True)
 
     with c6:
         if 'Season' in sales.columns:
             se = sales.groupby('Season')['Revenue'].sum().sort_values(ascending=False).reset_index()
+            season_list = se['Season'].tolist()
+            season_palette = ['#e67e22', '#3498db', '#2ecc71', '#9b59b6', '#f39c12', '#e74c3c']
+            season_colors = [season_palette[i % len(season_palette)] for i in range(len(season_list))]
             fig = go.Figure(go.Bar(
                 x=se['Season'], y=se['Revenue'],
-                marker=dict(color=['#e67e22', '#3498db'], opacity=0.85),
+                marker=dict(color=season_colors, opacity=0.85),
                 text=[fmt(v) for v in se['Revenue']],
                 textposition='outside', textfont=dict(size=9, color='#CCCCCC'),
             ))
@@ -657,6 +785,7 @@ def render_rfm(rfm):
         ))
         fig.update_layout(**puma_theme("RFM Segment Distribution", height=340))
         st.plotly_chart(fig, use_container_width=True)
+        st.caption("Each slice = % of customers in that segment. Champions & Loyal = high-value retention targets.")
 
     with sa2:
         fig = go.Figure()
@@ -727,6 +856,7 @@ def render_rfm(rfm):
                                    height=340),
                       yaxis_title="Normalized (0-1)")
     st.plotly_chart(fig, use_container_width=True)
+    st.caption("👁️ How to read: Segments closer to **1.0** on Frequency & Monetary are your highest-value customers. Segments near **0** on Recency have the most recent purchases.")
 
     # ── 3D RFM Scatter ───────────────────────────────────────────────────────
     st.markdown("### 3D RFM Space (Recency · Frequency · Monetary)")
@@ -773,6 +903,7 @@ def render_rfm(rfm):
         margin=dict(l=0, r=0, t=50, b=0),
     )
     st.plotly_chart(fig3d, use_container_width=True)
+    st.caption("🔄 Rotate the chart by dragging. Each dot = 1 customer. Tightly packed cluster = homogeneous behaviour. Dispersed = high within-segment variance.")
 
     # Segment summary table
     st.markdown("### Segment Summary")
@@ -809,9 +940,15 @@ def render_rfm(rfm):
     cols_to_show = ['Client', 'Recency', 'Frequency', 'Monetary', 
                     'R_Score', 'F_Score', 'M_Score', 'RFM_Score', 'Segment']
     
+    def _style_segment(val):
+        color = SEGMENT_COLORS_5.get(str(val).strip(), '#888888')
+        return f'background-color: {color}22; color: {color}; font-weight: 600'
+
     st.dataframe(
         rfm_filtered[cols_to_show].sort_values('RFM_Score', ascending=False)
-        .style.background_gradient(subset=['RFM_Score'], cmap='RdYlGn')
+        .style
+        .background_gradient(subset=['RFM_Score'], cmap='RdYlGn')
+        .applymap(_style_segment, subset=['Segment'])
         .format({'Monetary': '{:,.0f}', 'Recency': '{:,.0f}'}),
         use_container_width=True,
         height=450
@@ -860,48 +997,20 @@ def render_kmeans(rfm_km, meta):
     m4.metric("Customers", f"{len(rfm_km):,}")
     st.markdown("<div class='section-header'></div>", unsafe_allow_html=True)
 
-    # Row 1: Segment sizes + Radar chart (normalized profiles)
-    cc1, cc2 = st.columns(2)
-    with cc1:
-        kmc = (rfm_km['KMeans_Segment'].value_counts()
-               .reindex(cfg.SEG_ORDER_KM).reset_index())
-        kmc.columns = ['Segment', 'Count']
-        kmc['Pct'] = (kmc['Count'] / kmc['Count'].sum() * 100).round(1)
-        fig = go.Figure(go.Bar(
-            x=kmc['Segment'], y=kmc['Count'],
-            marker_color=[KMEANS_COLORS.get(s, '#888') for s in kmc['Segment']],
-            text=[f"{c:,} ({p:.0f}%)" for c, p in zip(kmc['Count'], kmc['Pct'])],
-            textposition='outside', textfont=dict(size=11, color='#CCCCCC'),
-        ))
-        fig.update_layout(**puma_theme("Segment Distribution", height=360),
-                          showlegend=False)
-        st.plotly_chart(fig, use_container_width=True)
-
-    with cc2:
-        # Radar chart (normalized) — much better than grouped bars for R/F/M
-        prof = rfm_km.groupby('KMeans_Segment')[['Recency', 'Frequency', 'Monetary']].mean()
-        profn = (prof - prof.min()) / (prof.max() - prof.min() + 1e-9)
-        fig = go.Figure()
-        for seg in cfg.SEG_ORDER_KM:
-            if seg in profn.index:
-                v = profn.loc[seg, ['Recency', 'Frequency', 'Monetary']].tolist()
-                fig.add_trace(go.Scatterpolar(
-                    r=v + [v[0]],
-                    theta=['Recency', 'Frequency', 'Monetary', 'Recency'],
-                    name=seg,
-                    line=dict(color=KMEANS_COLORS.get(seg, '#888'), width=2.5),
-                    fill='toself',
-                    fillcolor=hex_to_rgba(KMEANS_COLORS.get(seg, '#888'), 0.15),
-                ))
-        fig.update_layout(
-            **puma_theme("Cluster Profiles (Normalized Radar)", height=360),
-            polar=dict(bgcolor='#111111',
-                       radialaxis=dict(gridcolor='#333', linecolor='#333',
-                                       tickcolor='#999', color='#999',
-                                       range=[0, 1]),
-                       angularaxis=dict(gridcolor='#333', linecolor='#333')),
-        )
-        st.plotly_chart(fig, use_container_width=True)
+    # Row 1: Segment distribution (full width)
+    kmc = (rfm_km['KMeans_Segment'].value_counts()
+           .reindex(cfg.SEG_ORDER_KM).reset_index())
+    kmc.columns = ['Segment', 'Count']
+    kmc['Pct'] = (kmc['Count'] / kmc['Count'].sum() * 100).round(1)
+    fig = go.Figure(go.Bar(
+        x=kmc['Segment'], y=kmc['Count'],
+        marker_color=[KMEANS_COLORS.get(s, '#888') for s in kmc['Segment']],
+        text=[f"{c:,} ({p:.0f}%)" for c, p in zip(kmc['Count'], kmc['Pct'])],
+        textposition='outside', textfont=dict(size=11, color='#CCCCCC'),
+    ))
+    fig.update_layout(**puma_theme("Segment Distribution", height=360),
+                      showlegend=False)
+    st.plotly_chart(fig, use_container_width=True)
 
     # Row 2: Detailed per-metric profiles (3 separate bar charts — readable)
     st.markdown("### Cluster Metrics Breakdown")
@@ -988,12 +1097,12 @@ def render_kmeans(rfm_km, meta):
     st.caption(f"Showing {len(rfm_km_filtered):,} customers out of {len(rfm_km):,}")
 
     st.markdown("<div class='section-header'></div>", unsafe_allow_html=True)
-    
+
     # ── Executive Presentation Summary ─────────────────────────────────────────
     st.markdown("### 🎓 Executive Strategy (Graduation Presentation Summary)")
     st.markdown("""
-    <div style="background:linear-gradient(135deg, #111 0%, #1a1a1a 100%); 
-                border-left: 4px solid #FF0000; padding: 20px; border-radius: 6px; 
+    <div style="background:linear-gradient(135deg, #111 0%, #1a1a1a 100%);
+                border-left: 4px solid #FF0000; padding: 20px; border-radius: 6px;
                 border-top: 1px solid #333; border-right: 1px solid #333; border-bottom: 1px solid #333;
                 margin-top: 10px;">
         <h4 style="color:#FF0000; margin-top:0; font-family:'Barlow Condensed', sans-serif; letter-spacing:1px;">
@@ -1013,6 +1122,7 @@ def render_kmeans(rfm_km, meta):
         </p>
     </div>
     """, unsafe_allow_html=True)
+
 
 
 # ══ Tab 4 — CLV ══════════════════════════════════════════════════════════════
@@ -1091,35 +1201,10 @@ def render_clv(clv, meta, val_df, sales, bgf):
             st.plotly_chart(fig, use_container_width=True)
             st.caption("Tiers: **High CLV** = top 20% | **Medium CLV** = middle 30% | **Low CLV** = bottom 50%")
 
-    # ── Operational Insight: Product Affinity by Tier ────────────────────────
-    st.markdown("<div class='section-header'>Operational Strategy: Segment Product Affinity</div>", unsafe_allow_html=True)
-    if not sales.empty:
-        # Join clv segments with sales to see what each tier buys
-        aff_df = pd.merge(sales[['Client', 'Category', 'Revenue']], 
-                          clv[['Client', 'CLV_Tier']], on='Client', how='inner')
-        
-        occ1, occ2, occ3 = st.columns(3)
-        tiers = cfg.TIER_ORDER
-        cols = [occ1, occ2, occ3]
-        
-        for i, (tier, col) in enumerate(zip(tiers, cols)):
-            with col:
-                tier_data = aff_df[aff_df['CLV_Tier'] == tier]
-                if not tier_data.empty:
-                    top_cat = tier_data.groupby('Category')['Revenue'].sum().nlargest(5).reset_index()
-                    fig_aff = go.Figure(go.Bar(
-                        y=top_cat['Category'], x=top_cat['Revenue'], orientation='h',
-                        marker=dict(color=TIER_COLORS.get(tier, '#888'), opacity=0.8),
-                        text=[fmt(v) for v in top_cat['Revenue']], textposition='outside',
-                        textfont=dict(size=9, color='#AAA')
-                    ))
-                    fig_aff.update_layout(**puma_theme(f"Top Categories: {tier}", height=280),
-                                          xaxis_visible=False, showlegend=False)
-                    fig_aff.update_yaxes(autorange="reversed")
-                    st.plotly_chart(fig_aff, use_container_width=True)
 
     # ── Strategic Opportunity Simulator ──────────────────────────────────────
-    st.markdown("<div class='section-header'>Strategic Opportunity Simulator (What-If Analysis)</div>", unsafe_allow_html=True)
+    st.markdown("<div class='section-header'></div>", unsafe_allow_html=True)
+    st.markdown("### Strategic Opportunity Simulator (What-If Analysis)")
     with st.container():
         op_c1, op_c2 = st.columns([1, 1])
         with op_c1:
@@ -1255,10 +1340,10 @@ def render_clv(clv, meta, val_df, sales, bgf):
     sel_risks = f2.multiselect("Filter by Risk Level", options=risk_list, default=risk_list)
     
     target_list = clv[
-        (clv['CLV_Tier'].isin(sel_tiers)) & 
+        (clv['CLV_Tier'].isin(sel_tiers)) &
         (clv['Churn_Risk'].isin(sel_risks))
     ].copy()
-    
+
     display_cols = ['Client', 'CLV', 'CLV_Tier', 'P_Alive', 'Churn_Risk', 'pred_num_txn']
     st.dataframe(
         target_list[display_cols].sort_values('CLV', ascending=False),
@@ -1275,69 +1360,13 @@ def render_clv(clv, meta, val_df, sales, bgf):
     st.caption(f"Showing **{len(target_list):,}** targetable customers based on selected filters.")
     st.markdown("<div class='section-header'></div>", unsafe_allow_html=True)
 
-    # ── Executive Presentation Summary ─────────────────────────────────────────
-    st.markdown("### 🎓 Executive Strategy (Graduation Presentation Summary)")
-    st.markdown("""
-    <div style="background:linear-gradient(135deg, #111 0%, #1a1a1a 100%); 
-                border-left: 4px solid #FF0000; padding: 20px; border-radius: 6px; 
-                border-top: 1px solid #333; border-right: 1px solid #333; border-bottom: 1px solid #333;
-                margin-top: 10px; margin-bottom: 30px;">
-        <h4 style="color:#FF0000; margin-top:0; font-family:'Barlow Condensed', sans-serif; letter-spacing:1px;">
-            PREDICTIVE INTELLIGENCE (CLV)
-        </h4>
-        <p style="color:#E0E0E0; font-size:15px; line-height:1.7;">
-            While RFM and K-Means describe the <b>past</b>, our <b>BG/NBD & Gamma-Gamma algorithms</b> mathematically predict the <b>future</b>. By calculating the statistical probability of a customer being "Alive", we shift PUMA from reactive marketing to proactive intervention.
-        </p>
-        <ul style="color:#CCCCCC; font-size:14px; line-height:1.6; padding-left:20px;">
-            <li><b style="color:#2ecc71;">High CLV (Top 20%):</b> The financial backbone of the company. These clients generate the vast majority of future revenue. <i>Action: Guarantee VIP retention. The financial cost of losing one High CLV customer equals losing dozens of regular ones.</i></li>
-            <li><b style="color:#f39c12;">Medium CLV (Next 30%):</b> Reliable, steady buyers. <i>Action: Leverage 'What-If' Simulation analysis to strategically up-sell them into the High tier, generating massive geometric revenue lift.</i></li>
-            <li><b style="color:#e74c3c;">Low CLV & Churned:</b> Statistically 'dead' customers with a P(Alive) near zero. <i>Action: Stop spending premium acquisition/retention money here immediately. Let them organically attrit.</i></li>
-        </ul>
-        <p style="color:#999; font-size:13px; font-style:italic; margin-bottom:0; border-top: 1px solid #333; padding-top: 12px; margin-top: 15px;">
-            * Conclusion: Predictive CLV allows us to finally answer the ultimate marketing question: "Who should we spend our budget on today to guarantee revenue tomorrow?"
-        </p>
-    </div>
-    """, unsafe_allow_html=True)
 
-    # ── Methodology & AI Governance — Deep Academic Version ──────────────────
-    with st.expander("🔬 Methodology & AI Governance — Deep Technical Detail"):
-        st.markdown("### 1. The Modeling Framework")
-        st.info("""
-            **The Non-Contractual Problem**: Unlike a subscription (Netflix), PUMA doesn't know exactly when a customer "churns." 
-            They simply stop buying. We use a **Bayesian probabilistic framework** to solve this "Silent Churn" problem.
-        """)
-        
-        m1, m2 = st.columns(2)
-        with m1:
-            st.markdown(f"""
-                **A. BG/NBD (Beta-Geometric / Negative Binomial)**
-                *   **Purchase Process**: While active, a customer's purchase frequency follows a **Poisson Process** (captured by a Gamma distribution of transaction rates).
-                *   **Dropout Process**: After any purchase, a customer has a probability of "dropping out" (churning) according to a **Beta Distribution**.
-                *   **Key Inputs**: **Recency** (time since last purchase), **Frequency** (count of repeat purchases), and **T** (time since first purchase).
-                
-                **B. Gamma-Gamma Sub-model**
-                *   Estimation of **Monetary Value** assumes that average transaction value is independent of transaction frequency.
-                *   The variation in average spend between customers is modeled using a **Gamma distribution**.
-            """)
-        with m2:
-            st.markdown(f"""
-                **C. Model Hyperparameters (Calibration)**
-                *   **L2 Regularization ($\lambda$):** `{cfg.CLV_PENALIZER}` — Applied to prevent the model from over-fitting to extreme spending outliers (like errors or wholesale).
-                *   **Time-Unit Integration**: The models were trained on **Weekly Cadence** for precision, then projected to 12-month value.
-                *   **NPV Discounting**: Applied a weekly discount rate of `{cfg.CLV_DISCOUNT_WK:.4f}` (~12% annually) to reflect the **Net Present Value** of future cash.
-                
-                **D. Scientific Scope**
-                *   **Min-Frequency Requirement**: Models are applied only to customers with $F > 0$. 
-                *   **Holdout Validation**: {cfg.CLV_HOLDOUT_DAYS}-day window used to verify that the model correctly "foretells" the behavior of the test group.
-            """)
-        
-        st.caption("Theoretical Basis: *Peter Fader (Wharton) & Bruce Hardie (LBS)*. Implementation: Python Lifetimes Library.")
 
-# ══ Tab 5 — Demand Forecasting ═══════════════════════════════════════════════
+# ══ Tab 5 — Sales Forecasting ═══════════════════════════════════════════════
 
-def render_forecasting(sales, daily, ft, meta, s_fit, p_model, x_model, horizon):
-    """Render forecasting tab (Optimized for Business)."""
-    st.markdown("## 📈 Demand Forecasting & Business Impact")
+def render_forecasting(sales, daily, ft, meta, s_fit, p_model, x_model, horizon, rf_model=None):
+    """Render sales forecasting tab (Optimized for Business)."""
+    st.markdown("## 📈 Sales Forecasting & Business Impact")
 
     metrics = meta['metrics']
     best = meta['best_model']
@@ -1348,30 +1377,44 @@ def render_forecasting(sales, daily, ft, meta, s_fit, p_model, x_model, horizon)
     recent_history = daily.tail(30)
     recent_avg_rev = recent_history['y'].mean() if len(recent_history) > 0 else daily['y'].mean()
     lifetime_avg_rev = daily['y'].mean()
-    accuracy = max(0, 100 * (1 - (best_mae / lifetime_avg_rev))) if lifetime_avg_rev > 0 else 0
-    
-    # Generate the forward forecast dynamically using the WINNING model
-    last_dt = daily['ds'].max()
+    # Forecast Error % = MAE / test-period mean (not lifetime average to avoid >100% values)
+    test_mean_rev = daily.tail(60)['y'].mean() if len(daily) >= 60 else lifetime_avg_rev
+    forecast_error_pct = min(100, 100 * (best_mae / test_mean_rev)) if test_mean_rev > 0 else 0
+
+    # Generate the forward forecast — ALL models project from the true future
+    # (the day after the last known date), so the chart always shows unseen dates.
+    # For SARIMA (fitted only on training days 1-303), we forecast N_TEST+horizon
+    # steps and discard the first N_TEST (which overlap the test window already shown
+    # in the Historical Validation chart above), keeping only the truly new dates.
+    N_TRAIN   = 303                              # days used to fit SARIMA
+    N_TEST    = meta.get('n_test_days', 60)      # test days already seen (from meta)
+    last_dt   = daily['ds'].max()                # last known date for ALL models
     base_date = last_dt + pd.Timedelta(days=1)
     history_y = daily['y'].values
-    
+
     if best == 'Prophet':
-        future = p_model.make_future_dataframe(periods=horizon)
-        fcst = p_model.predict(future)
+        future    = p_model.make_future_dataframe(periods=horizon)
+        fcst      = p_model.predict(future)
         fwd_preds = np.clip(fcst.tail(horizon)['yhat'], 0, None)
     elif best == 'SARIMA':
-        s_fcst = s_fit.get_forecast(steps=horizon)
-        fwd_preds = np.clip(s_fcst.predicted_mean, 0, None)
-    else:
+        # Forecast N_TEST + horizon steps from the training endpoint,
+        # then drop the first N_TEST (already-seen test period) to keep
+        # only the horizon days that are truly beyond Jan 1 2026.
+        s_fcst    = s_fit.get_forecast(steps=N_TEST + horizon)
+        fwd_preds = np.clip(s_fcst.predicted_mean[-horizon:], 0, None)
+    elif best == 'XGBoost':
         fwd_preds = _xgb_recursive_forecast(x_model, history_y, cfg.FEAT_COLS, base_date, horizon)
-        
+    else:  # RF
+        _mdl      = rf_model if rf_model is not None else x_model
+        fwd_preds = _xgb_recursive_forecast(_mdl, history_y, cfg.FEAT_COLS, base_date, horizon)
+
     predicted_revenue = sum(fwd_preds)
-    
+
     # ── Financial Bottom Line Card ──
     m1, m2, m3 = st.columns(3)
-    m1.metric(f"Predicted {horizon}-Day Revenue", fmt(predicted_revenue), delta="Expected Value")
-    m2.metric("AI Accuracy Score", f"{accuracy:.1f}%", delta="Based on Test Data")
-    m3.metric("Winning AI Model", best, delta="Lowest Error")
+    m1.metric(f"Predicted {horizon}-Day Revenue", fmt_currency(predicted_revenue), delta="Expected Value")
+    m2.metric("Forecast Error %", f"{forecast_error_pct:.1f}%", delta="MAE / Test-Period Mean")
+    m3.metric("Best Model", best, delta="Lowest Error")
     
     st.markdown("<div class='section-header'></div>", unsafe_allow_html=True)
     
@@ -1397,7 +1440,17 @@ def render_forecasting(sales, daily, ft, meta, s_fit, p_model, x_model, horizon)
         x=ft['ds'], y=ft['y'], mode='lines', name='Actual Revenue',
         line=dict(color='#FFFFFF', width=2)))
         
-    pred_col = {'SARIMA': 'sarima_pred', 'Prophet': 'prophet_pred', 'XGBoost': 'xgb_pred'}[best]
+    pred_col_map = {
+        'SARIMA' : 'sarima_pred',
+        'Prophet': 'prophet_pred',
+        'XGBoost': 'xgb_pred',
+        'RF'     : 'rf_pred',
+    }
+    pred_col = pred_col_map.get(best, 'sarima_pred')
+    if pred_col not in ft.columns:
+        st.warning(f"Prediction column '{pred_col}' not found in saved artifacts. "
+                   "Re-run `train_models.py` to regenerate forecast data including RF.")
+        pred_col = 'sarima_pred'  # fallback
     
     fig_test.add_trace(go.Scatter(
         x=ft['ds'], y=ft[pred_col], mode='lines',
@@ -1414,41 +1467,76 @@ def render_forecasting(sales, daily, ft, meta, s_fit, p_model, x_model, horizon)
     fut_dates = pd.date_range(base_date, periods=horizon, freq='D')
 
     fwd_preds_np = np.array(fwd_preds)
-    
-    # Create expanding confidence multiplier (uncertainty grows over time)
-    # Starts at 1.0 (baseline MAE error) and grows smoothly by 2% per day of the horizon
-    expanding_factor = 1.0 + (np.arange(horizon) * 0.02)
+
+    # Confidence bands grow with √horizon (statistically correct for cumulative uncertainty)
+    # Factor at day 1 = 1.05, day 30 ≈ 1.27, day 60 ≈ 1.39 — avoids unrealistic linear bloat
+    expanding_factor = 1.0 + (np.sqrt(np.arange(horizon)) * 0.05)
     upper_bound = fwd_preds_np + (best_mae * expanding_factor)
     lower_bound = np.maximum(0, fwd_preds_np - (best_mae * expanding_factor))
 
     fig2 = go.Figure()
-    h60 = daily.tail(60)
+    # Show 60 days of history leading up to the forecast origin (last_dt)
+    h60 = daily[daily['ds'] <= last_dt].tail(60)
     fig2.add_trace(go.Scatter(
-        x=h60['ds'], y=h60['y'], mode='lines', name='Historical',
-        line=dict(color='#888', width=1.5)))
-        
+        x=h60['ds'], y=h60['y'], mode='lines', name='Historical (60 Days Pre-Forecast)',
+        line=dict(color='#AAAAAA', width=1.5)))
+
+    # Lower CI bound (invisible, anchors the fill)
     fig2.add_trace(go.Scatter(
         x=fut_dates, y=lower_bound, mode='lines',
-        line=dict(width=0), showlegend=False))
-        
+        line=dict(width=0), showlegend=False, hoverinfo='skip'))
+
+    # Upper CI bound fills back to lower (confidence envelope)
     fig2.add_trace(go.Scatter(
         x=fut_dates, y=upper_bound, mode='lines', fill='tonexty',
-        fillcolor='rgba(46,204,113,0.15)', line=dict(width=0), 
-        name='Expected Range (Best/Worst Case)'))
-        
+        fillcolor='rgba(46,204,113,0.12)', line=dict(width=0),
+        name='Confidence Interval (±MAE × √t)'))
+
+    # Expected Revenue — main forecast line, drawn last so it sits on top
     fig2.add_trace(go.Scatter(
         x=fut_dates, y=fwd_preds_np, mode='lines',
-        name=f'Expected Revenue',
-        line=dict(color='#2ecc71', width=3)))
-        
-    fig2.add_vrect(
-        x0=last_dt, x1=fut_dates[-1],
-        fillcolor='rgba(46,204,113,0.02)', layer='below', line_width=0)
-        
+        name=f'Expected Daily Revenue ({best})',
+        line=dict(color='#2ecc71', width=2.5)))
+
+    # Forecast start marker — use add_shape to avoid Plotly string-date arithmetic bug
+    fig2.add_shape(
+        type='line',
+        x0=last_dt, x1=last_dt, y0=0, y1=1,
+        xref='x', yref='paper',
+        line=dict(color='#FF0000', width=1, dash='dot'),
+    )
+    fig2.add_annotation(
+        x=last_dt, y=1.0, xref='x', yref='paper',
+        text='Forecast Start', showarrow=False,
+        font=dict(size=10, color='#FF0000'),
+        xanchor='left', yanchor='top',
+        bgcolor='rgba(26,26,26,0.7)',
+    )
+
+    # Annotate total projected revenue at mid-point of horizon
+    mid_idx = horizon // 2
+    fig2.add_annotation(
+        x=fut_dates[mid_idx], y=float(upper_bound[mid_idx]) * 1.05,
+        text=f"Total {horizon}-Day Projection: {fmt(float(sum(fwd_preds_np)))}",
+        showarrow=False,
+        font=dict(size=11, color='#2ecc71'),
+        bgcolor='rgba(26,26,26,0.8)',
+        bordercolor='#2ecc71',
+        borderwidth=1,
+    )
+
     fig2.update_layout(**puma_theme(
-        f"Projected Scenarios for Next {horizon} Days", height=400))
-    fig2.update_yaxes(tickformat=",")
+        f"Expected Revenue — Next {horizon} Days", height=420))
+    fig2.update_yaxes(tickformat=",", title_text="Daily Revenue (DZD)")
+    fig2.update_xaxes(title_text="Date")
     st.plotly_chart(fig2, use_container_width=True)
+    st.caption(
+        "⚠️ **Methodology Note:** This forecast projects from the **training endpoint "
+        f"(last known date: {last_dt.strftime('%d %b %Y')})**, not from today's date. "
+        "The historical context (grey line) shows the 60 days preceding that endpoint. "
+        "To generate a forecast from the current date, re-run `train_models.py` with "
+        "updated sales data."
+    )
 
     with st.expander("🛠️ Advanced Methodology & Technical Details"):
         st.markdown("Here we compare the raw evaluation metrics of all three models on the test set:")
@@ -1482,44 +1570,9 @@ def render_forecasting(sales, daily, ft, meta, s_fit, p_model, x_model, horizon)
             fig_fi.update_layout(**puma_theme("", height=280), showlegend=False)
             st.plotly_chart(fig_fi, use_container_width=True)
             
-        st.caption("SARIMA explicitly models 7-day seasonality. Prophet applies Meta's changepoint algorithm. XGBoost captures lag mechanics natively via recursive projection.")
+        st.caption("SARIMA explicitly models 7-day seasonality ($s=7$). Prophet applies Meta's changepoint algorithm with Fourier seasonality. XGBoost and Random Forest (300 trees) capture lag-based patterns via recursive one-step-ahead projection. **All four models are evaluated on the identical 60-day hold-out window** — no model saw the test data during training.")
 
-        # Monthly seasonality & Day of Week
-        st.markdown("### Additional Components")
-        c1, c2 = st.columns(2)
-        with c1:
-            if 'Day_Name' in sales.columns:
-                dow_ord = ["Monday", "Tuesday", "Wednesday", "Thursday",
-                           "Friday", "Saturday", "Sunday"]
-                dwa = (sales.groupby('Day_Name')['Revenue']
-                       .mean().reindex(dow_ord).dropna())
-                fig_dow = go.Figure(go.Bar(
-                    x=dwa.index, y=dwa.values,
-                    marker=dict(color=['#FF0000' if d in ('Friday', 'Saturday')
-                                       else '#3498db' for d in dwa.index],
-                                opacity=0.85),
-                    text=[fmt(v) for v in dwa.values],
-                    textposition='outside', textfont=dict(size=9, color='#CCCCCC'),
-                ))
-                fig_dow.update_layout(**puma_theme("Avg Revenue by Day of Week", height=300),
-                                  showlegend=False)
-                fig_dow.update_yaxes(tickformat=",")
-                st.plotly_chart(fig_dow, use_container_width=True)
 
-        with c2:
-            if 'Month_Name' in sales.columns:
-                mord = ["January", "February", "March", "April", "May", "June",
-                        "July", "August", "September", "October", "November", "December"]
-                moa = sales.groupby('Month_Name')['Revenue'].mean().reindex(mord).dropna()
-                fig_mo = go.Figure(go.Scatter(
-                    x=moa.index, y=moa.values, mode='lines+markers',
-                    line=dict(color='#FF0000', width=2.5),
-                    marker=dict(size=8, color='#FF0000'),
-                    fill='tozeroy', fillcolor='rgba(255,0,0,0.06)'
-                ))
-                fig_mo.update_layout(**puma_theme("Monthly Seasonality", height=300))
-                fig_mo.update_yaxes(tickformat=",")
-                st.plotly_chart(fig_mo, use_container_width=True)
 
 
 def _xgb_recursive_forecast(model, history_y, feat_cols, base_date, n_days):
@@ -1566,41 +1619,48 @@ def render_clients(rfm_km, sales):
         )
     with r1c2:
         all_cats = sorted(rfm_km['Category'].dropna().unique().tolist())
-        selected_cats = st.multiselect("Filter Category", options=all_cats, default=all_cats)
+        selected_cats = st.multiselect("Filter Category", options=all_cats, default=[],
+                                       placeholder="All categories")
     with r1c3:
         all_brks = sorted(rfm_km['Breakout'].dropna().unique().tolist())
-        selected_brks = st.multiselect("Filter Breakout", options=all_brks, default=all_brks)
+        selected_brks = st.multiselect("Filter Breakout", options=all_brks, default=[],
+                                       placeholder="All breakouts")
 
     r2c1, r2c2, r2c3 = st.columns([1, 1, 2])
     with r2c1:
         all_dims = sorted(rfm_km['Dimension'].dropna().unique().tolist())
-        selected_dims = st.multiselect("Filter Dimension", options=all_dims, default=all_dims)
+        selected_dims = st.multiselect("Filter Dimension", options=all_dims, default=[],
+                                       placeholder="All dimensions")
     with r2c2:
         all_ages = sorted(rfm_km['Age_Cat'].dropna().unique().tolist())
-        selected_ages = st.multiselect("Filter Age Group", options=all_ages, default=all_ages)
+        selected_ages = st.multiselect("Filter Age Group", options=all_ages, default=[],
+                                       placeholder="All age groups")
     with r2c3:
         if model_type == "Business Rules (RFM)":
             segs = cfg.SEG_ORDER_5
             filt_col = 'Segment'
-            selected_segs = st.multiselect("Filter RFM Segment", options=segs, default=segs)
+            selected_segs = st.multiselect("Filter RFM Segment", options=segs, default=[],
+                                           placeholder="All segments")
         else:
             segs = cfg.SEG_ORDER_KM
             filt_col = 'KMeans_Segment'
-            selected_segs = st.multiselect("Filter K-Means Cluster", options=segs, default=segs)
+            selected_segs = st.multiselect("Filter K-Means Cluster", options=segs, default=[],
+                                           placeholder="All clusters")
 
-    # 2. Filter data
-    df_filt = rfm_km[
-        (rfm_km[filt_col].isin(selected_segs)) & 
-        (rfm_km['Category'].isin(selected_cats)) &
-        (rfm_km['Breakout'].isin(selected_brks)) &
-        (rfm_km['Dimension'].isin(selected_dims)) &
-        (rfm_km['Age_Cat'].isin(selected_ages))
-    ].copy()
+    # 2. Filter data — empty selection = show all (no filter applied)
+    mask = pd.Series(True, index=rfm_km.index)
+    if selected_segs:
+        mask &= rfm_km[filt_col].isin(selected_segs)
+    if selected_cats:
+        mask &= rfm_km['Category'].isin(selected_cats)
+    if selected_brks:
+        mask &= rfm_km['Breakout'].isin(selected_brks)
+    if selected_dims:
+        mask &= rfm_km['Dimension'].isin(selected_dims)
+    if selected_ages:
+        mask &= rfm_km['Age_Cat'].isin(selected_ages)
+    df_filt = rfm_km[mask].copy()
     
-    # 3. Search
-    search = st.text_input("Search by Client ID", placeholder="Enter ID (e.g., Fidelity_123)")
-    if search:
-        df_filt = df_filt[df_filt['Client'].str.contains(search, case=False)]
 
     # 4. Display with Interaction (Click to Inspect)
     st.markdown(f"**Showing {len(df_filt):,} clients**")
@@ -1722,6 +1782,230 @@ def render_clients(rfm_km, sales):
     )
 
 
+# ══ Tab 7 — Documentation ════════════════════════════════════════════════════
+
+def render_docs(km_meta, clv_meta, fc_meta):
+    st.markdown("## 📖 Project Documentation")
+    st.caption("PUMA Algeria Analytics Dashboard — SARL GREAT WAY | ENSSEA 2025-2026")
+
+    # ── Section 1: Pipeline Overview ─────────────────────────────────────────
+    st.markdown("---")
+    st.markdown("### 🔄 Analytics Pipeline Overview")
+    st.markdown("""
+    The dashboard is powered by a fully automated Python pipeline (`train_models.py`) that
+    transforms raw ERP export data into actionable customer intelligence in four stages:
+    """)
+
+    cols = st.columns(4)
+    stages = [
+        ("1 — Data Ingestion\n& Cleaning",
+         "Raw XLSX → 300,761 clean sales rows. Drops duplicates, fixes dtypes, "
+         "excludes Passage walk-in code (SC000004) for customer analytics."),
+        ("2 — RFM Scoring\n& K-Means",
+         "35,696 identified customers scored on Recency / Frequency / Monetary. "
+         "K-Means (k=4) fitted on log-scaled features to produce 4 behavioural segments."),
+        ("3 — CLV Modelling\n(BG/NBD + GG)",
+         "8,562 repeat-purchase customers modelled. BG/NBD predicts future transactions; "
+         "Gamma-Gamma predicts average spend. 52-week CLV horizon."),
+        ("4 — Demand\nForecasting",
+         "Daily revenue series (363 days). SARIMA(2,1,2)(1,0,1)₇ selected as best model "
+         "with MAE = 792,505 DZD over a 60-day test window."),
+    ]
+    for col, (title, desc) in zip(cols, stages):
+        with col:
+            st.info(f"**{title}**\n\n{desc}")
+
+    # ── Section 2: Data Dictionary ────────────────────────────────────────────
+    st.markdown("<div class='section-header'></div>", unsafe_allow_html=True)
+    st.markdown("### 📋 Data Dictionary — Raw ERP Columns")
+    st.markdown("Source file: **VENTES PUMA 2025.xlsx** — 333,843 raw rows → 300,761 after cleaning")
+
+    dict_data = {
+        "ERP Column (French)": [
+            "Heure/Date de saisie du doc.",
+            "N° du document",
+            "Type du document",
+            "Client",
+            "Libellé Client",
+            "Magasin du document",
+            "Code article ligne doc.",
+            "Désignation ligne doc.",
+            "Brand ligne doc.",
+            "Famille ligne doc.",
+            "Breakout ligne doc.",
+            "LIBDIM1",
+            "Collection ligne doc.",
+            "Prix unitaire TTC net ligne",
+            "Quantité ligne doc.",
+            "Total TTC ligne doc.",
+            "Etablissement du doc.",
+            "Vendeur du doc.",
+        ],
+        "Dashboard Name": [
+            "Date", "Doc_ID", "Doc_Type", "Client", "Client_Name",
+            "Store", "— (dropped)", "— (dropped)", "— (dropped)", "Category",
+            "Breakout", "Dimension", "Collection", "— (dropped)",
+            "Qty", "Revenue", "— (dropped)", "Seller",
+        ],
+        "Status": [
+            "✅ Used", "✅ Used", "✅ Used", "✅ Used", "✅ Used",
+            "✅ Used", "❌ Dropped", "❌ Dropped", "❌ Dropped", "✅ Used",
+            "✅ Dashboard only", "✅ Dashboard only", "✅ Dashboard only", "❌ Dropped",
+            "✅ Used", "✅ Used", "❌ Dropped", "✅ Used",
+        ],
+        "Description": [
+            "Transaction datetime", "Unique document number", "Sale / Return / Transfer",
+            "Customer code — SC000004 = Passage (walk-in)", "Customer display name",
+            "Store / boutique identifier", "Internal article code — not needed post-join",
+            "Long article description — redundant", "Brand label — redundant with Category",
+            "Product family: Sportstyle, Running, Kids, Teamsport…",
+            "Product breakout / style variant — Clients tab filter",
+            "Size dimension — Clients tab filter",
+            "Season collection — Clients tab filter",
+            "Unit price incl. tax — Revenue already computed",
+            "Units sold per line", "Line total revenue (DZD) — primary KPI",
+            "Legal entity — single entity, zero variance",
+            "Salesperson code",
+        ],
+    }
+    st.dataframe(
+        dict_data,
+        use_container_width=True,
+        height=560,
+    )
+
+    # ── Section 3: Methodology ────────────────────────────────────────────────
+    st.markdown("<div class='section-header'></div>", unsafe_allow_html=True)
+    st.markdown("### 🔬 Methodology")
+
+    m1, m2 = st.columns(2)
+
+    with m1:
+        st.markdown("#### RFM Scoring")
+        st.markdown("""
+Each of the 35,696 identified customers (Passage excluded) receives three integer scores (1–5):
+
+| Score | Recency (days) | Frequency (purchases) | Monetary (percentile) |
+|---|---|---|---|
+| 5 | 0–60 | ≥ 6 | Top 10 % |
+| 4 | 60–120 | 4–5 | P70–P90 |
+| 3 | 120–210 | 3 | P50–P70 |
+| 2 | 210–270 | 2 | P30–P50 |
+| 1 | ≥ 270 | 1 | Bottom 30 % |
+
+**RFM Score = R + F + M** (integer, 3–15).
+Five rule-based segments assigned via score grid: Champions, Loyal, At Risk, New, Lost.
+        """)
+
+        st.markdown("#### K-Means Clustering")
+        st.markdown(f"""
+K-Means run on **log(1+x)** transformed Frequency & Monetary + raw Recency, then StandardScaler.
+
+| k | Silhouette | Davies-Bouldin | Inertia |
+|---|---|---|---|
+| 2 | 0.481 | 1.000 | 64,511 |
+| 3 | 0.432 | 0.953 | 47,460 |
+| **4** | **{km_meta['silhouette']:.3f}** | **{km_meta['davies_bouldin']:.3f}** | **36,547** |
+| 5 | 0.325 | 0.984 | 30,719 |
+| 6 | 0.328 | 0.929 | 26,797 |
+
+**k = 4 selected** — elbow point, best balance of Silhouette and DB index.
+Segments: **Champions, Promising, At Risk, Dormant**.
+        """)
+
+    with m2:
+        st.markdown("#### BG/NBD + Gamma-Gamma (CLV)")
+        st.markdown(f"""
+Probabilistic CLV models fitted on **{clv_meta['n_customers']:,} repeat-purchase customers**
+(frequency > 0, i.e. ≥ 2 distinct purchase occasions).
+
+- **BG/NBD**: models the number of future transactions given past behaviour.
+  Parameters (r, α) govern purchase rate heterogeneity; (a, b) govern churn heterogeneity.
+- **Gamma-Gamma**: models average transaction value.
+  Parameters (p, q, γ) describe spend distribution.
+- Spearman ρ (frequency × monetary) = **{clv_meta['spearman_corr_freq_monetary']:.4f}** < 0.20 ✅ independence confirmed.
+- L2 penaliser = 0.01 — prevents overfitting on high-frequency, high-spending customers.
+- **52-week horizon** | Weekly discount rate = {clv_meta['discount_rate_weekly']:.4f}
+- Median CLV = **{clv_meta['clv_median']:,.0f} DZD** | Top-20% share = **{clv_meta['top20_revenue_share']:.1f}%**
+        """)
+
+        st.markdown("#### Sales Forecasting")
+        order    = fc_meta['sarima_order']
+        seasonal = fc_meta['sarima_seasonal_order']
+        metrics  = fc_meta['metrics']
+        st.markdown(f"""
+Daily revenue series: **363 days** | Train: 303 days | Test: **60 days**
+(3 Nov 2025 – 1 Jan 2026 — includes pre-Eid ramp-up and year-end surge).
+
+Four models evaluated in test window (60 days):
+
+| Model | MAE (DZD) | RMSE (DZD) |
+|---|---|---|
+| **SARIMA({order[0]},{order[1]},{order[2]})({seasonal[0]},{seasonal[1]},{seasonal[2]},{seasonal[3]})** | **{metrics['SARIMA']['MAE']:,.0f}** | **{metrics['SARIMA']['RMSE']:,.0f}** |
+| Prophet | {metrics['Prophet']['MAE']:,.0f} | {metrics['Prophet']['RMSE']:,.0f} |
+| XGBoost | {metrics['XGBoost']['MAE']:,.0f} | {metrics['XGBoost']['RMSE']:,.0f} |
+{f"| Random Forest | {metrics['RF']['MAE']:,.0f} | {metrics['RF']['RMSE']:,.0f} |" if 'RF' in metrics else ''}
+
+**{fc_meta['best_model']} selected** — lowest MAE.
+Features used by XGBoost/RF: day-of-week, month, ISO week, lag-7/14/28, rolling-7/14.
+        """)
+
+    # ── Section 4: Model Artifacts ────────────────────────────────────────────
+    st.markdown("---")
+    st.markdown("### 🗂️ Model Artifacts & Training Log")
+
+    a1, a2, a3, a4 = st.columns(4)
+    a1.metric("Training Date",      training_log.get('trained_at', 'Unknown')[:10])
+    a2.metric("Raw Rows",           f"{training_log.get('n_rows_raw', 0):,}")
+    a3.metric("Clean Sales Rows",   f"{training_log.get('n_rows_sales', 0):,}")
+    a4.metric("Snapshot Date",      training_log.get('snapshot_date', '2026-01-02'))
+
+    b1, b2, b3, b4 = st.columns(4)
+    b1.metric("K-Means k",          str(km_meta['k']))
+    b2.metric("Silhouette Score",   f"{km_meta['silhouette']:.4f}")
+    b3.metric("Davies-Bouldin",     f"{km_meta['davies_bouldin']:.4f}")
+    b4.metric("CLV Customers",      f"{clv_meta['n_customers']:,}")
+
+    c1, c2, c3, c4 = st.columns(4)
+    c1.metric("Median CLV",         f"{clv_meta['clv_median']:,.0f} DZD")
+    c2.metric("SARIMA MAE",         f"{metrics['SARIMA']['MAE']/1e6:.2f} M DZD")
+    c3.metric("Forecast Horizon",   "60-day test")
+    c4.metric("Best Forecast Model", forecast_meta.get('best_model', 'SARIMA'))
+
+    st.markdown("---")
+    st.markdown("### 📁 Artifact Files")
+    artifact_files = {
+        "File": [
+            "sales_clean.parquet", "rfm_scored.parquet", "rfm_clustered.parquet",
+            "clv_table.parquet", "daily_sales.parquet",
+            "kmeans_model.joblib", "kmeans_scaler.joblib", "kmeans_meta.json",
+            "bgf_model.pkl", "ggf_model.pkl", "clv_meta.json",
+            "sarima_model.pkl", "prophet_model.pkl", "xgb_model.pkl", "rf_forecast.pkl",
+            "forecast_meta.json", "training_log.json",
+        ],
+        "Description": [
+            f"{training_log.get('n_rows_sales', 300761):,} cleaned sales transactions (all client types)",
+            "35,696 customers with R/F/M scores and rule-based segments",
+            "35,696 customers with K-Means cluster assignments",
+            "8,562 customers with 52-week CLV predictions",
+            "363-day daily revenue series for forecasting",
+            "Fitted K-Means model (scikit-learn)",
+            "StandardScaler fitted on RFM features",
+            "K-Means hyperparameters and k-sweep results",
+            "Fitted BG/NBD model (lifetimes library)",
+            "Fitted Gamma-Gamma model (lifetimes library)",
+            "CLV model parameters and coverage metrics",
+            "Fitted SARIMA model (statsmodels)",
+            "Fitted Prophet model (Meta)",
+            "Fitted XGBoost model (xgboost)",
+            "Fitted Random Forest model (scikit-learn) — optional, re-run train_models.py",
+            "Forecast model metrics and feature list",
+            "Full training run log with timestamps",
+        ],
+    }
+    st.dataframe(artifact_files, use_container_width=True, height=460)
+
+
 # ══ RENDER TABS ══════════════════════════════════════════════════════════════
 
 with tabs[0]:
@@ -1738,7 +2022,11 @@ with tabs[3]:
 
 with tabs[4]:
     render_forecasting(sales, daily_sales, forecast_test, forecast_meta,
-                       sarima_fit, prophet_model, xgb_model, forecast_days)
+                       sarima_fit, prophet_model, xgb_model, forecast_days,
+                       rf_model=rf_model)
 
 with tabs[5]:
     render_clients(rfm_clustered, sales_all)
+
+with tabs[6]:
+    render_docs(kmeans_meta, clv_meta, forecast_meta)

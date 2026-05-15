@@ -243,14 +243,27 @@ def fit_kmeans(rfm: pd.DataFrame, k: int) -> tuple:
 
     # Feature preparation — use raw continuous variables for geometric distance
     feats = rfm[['Recency', 'Frequency', 'Monetary']].copy()
-    
-    # 1. Log Transform to correct extreme right-skewness (Whales/Outliers)
-    # We use np.log1p (log(1+x)) to gracefully handle 0 values in Recency/Monetary
+
+    # 1. Log Transform to correct extreme right-skewness
     feats_log = np.log1p(feats)
 
-    # 2. Scale and fit to balance units (days vs thousands of DZD)
+    # 2. Scale to balance units
     scaler = StandardScaler()
     X = scaler.fit_transform(feats_log)
+
+    # Elbow / silhouette sweep across k=2..6 for reproducibility and validation
+    print("    Cluster selection sweep (k=2..6):")
+    sweep_meta = {}
+    for k_cand in range(2, 7):
+        km_cand = KMeans(n_clusters=k_cand, random_state=42, n_init=10)
+        lbl_cand = km_cand.fit_predict(X)
+        sil_cand = silhouette_score(X, lbl_cand)
+        db_cand  = davies_bouldin_score(X, lbl_cand)
+        sweep_meta[k_cand] = {'silhouette': round(float(sil_cand), 4),
+                               'davies_bouldin': round(float(db_cand), 4),
+                               'inertia': round(float(km_cand.inertia_), 1)}
+        print(f"      k={k_cand}: Silhouette={sil_cand:.4f}  DB={db_cand:.4f}  Inertia={km_cand.inertia_:,.0f}")
+
     km = KMeans(n_clusters=k, random_state=42, n_init=10)
     labels = km.fit_predict(X)
 
@@ -278,6 +291,7 @@ def fit_kmeans(rfm: pd.DataFrame, k: int) -> tuple:
         'k': k,
         'segment_names': cfg.KMEANS_SEGMENT_NAMES,
         'cluster_to_segment': {int(k_): v for k_, v in cluster_to_segment.items()},
+        'k_sweep': sweep_meta,
     }
 
     print(f"    Silhouette: {sil:.4f}")
@@ -329,7 +343,7 @@ def fit_clv(sales: pd.DataFrame, snapshot: pd.Timestamp) -> tuple:
 
     # Gamma-Gamma assumption check
     corr = lf['frequency'].corr(lf['monetary_value'], method='spearman')
-    if abs(corr) > 0.30:
+    if abs(corr) > 0.20:
         print(f"    WARNING: Spearman corr(frequency, monetary_value) = {corr:.3f}"
               " -- Gamma-Gamma assumption weakened")
     else:
@@ -547,6 +561,23 @@ def fit_xgboost(train_lag, test_lag, feat_cols) -> tuple:
     return xgb_model, xgb_pred_test
 
 
+def fit_rf(train_lag, test_lag, feat_cols) -> tuple:
+    """Fit Random Forest. Returns (model, test_pred)."""
+    print(" -- Fitting Random Forest...")
+    from sklearn.ensemble import RandomForestRegressor
+    rf_model = RandomForestRegressor(
+        n_estimators=300,
+        max_features='sqrt',
+        min_samples_leaf=2,
+        random_state=42,
+    )
+    rf_model.fit(train_lag[feat_cols], train_lag['y'])
+    rf_pred_test = rf_model.predict(test_lag[feat_cols])
+    rf_pred_test = np.clip(rf_pred_test, 0, None)
+    print(f"    Random Forest fitted, {len(rf_pred_test)} test predictions generated")
+    return rf_model, rf_pred_test
+
+
 def xgb_recursive_forecast(model, history_y, feat_cols, base_date, n_days) -> list:
     """Recursive step-by-step forecast for XGBoost. Correct lag propagation."""
     hist = list(history_y)
@@ -611,9 +642,25 @@ def main():
     print(f"    Saved: {cfg.CLV_TABLE.name}, bgf_model.pkl, ggf_model.pkl, "
           f"{cfg.CLV_META.name}\n")
 
+    # ── Mann-Whitney U test: Champions vs Dormant CLV ─────────────────────
+    from scipy.stats import mannwhitneyu
+    merged_clv = rfm_clustered[['Client', 'KMeans_Segment']].merge(
+        clv_table[['Client', 'CLV']], on='Client', how='inner')
+    champ_clv = merged_clv[merged_clv['KMeans_Segment'] == 'Champions']['CLV']
+    dorm_clv  = merged_clv[merged_clv['KMeans_Segment'] == 'Dormant']['CLV']
+    if len(champ_clv) > 0 and len(dorm_clv) > 0:
+        mw_u, mw_p = mannwhitneyu(champ_clv, dorm_clv, alternative='greater')
+        print(f"    Mann-Whitney U (Champions>Dormant CLV): U={mw_u:.0f}  p={mw_p:.2e}")
+
     # ── Section 4: Forecasting ───────────────────────────────────────────
     daily = build_daily_series(sales_clean)
     daily.to_parquet(cfg.DAILY_SALES, index=False)
+
+    # ── ADF stationarity test ──────────────────────────────────────────────
+    from statsmodels.tsa.stattools import adfuller
+    adf_result = adfuller(daily['y'].values, autolag='AIC')
+    print(f"    ADF test: stat={adf_result[0]:.4f}  p={adf_result[1]:.4f}  "
+          f"({'reject H0: stationary' if adf_result[1] < 0.05 else 'fail to reject H0: unit root'})")
 
     # Train/test split — last 60 days
     train_end = daily['ds'].max() - pd.Timedelta(days=cfg.FORECAST_TEST_DAYS)
@@ -629,6 +676,13 @@ def main():
     with open(cfg.SARIMA_FIT, 'wb') as f:
         pickle.dump(sarima_fit_obj, f)
 
+    # ── Ljung-Box residual test ───────────────────────────────────────────
+    from statsmodels.stats.diagnostic import acorr_ljungbox
+    lb = acorr_ljungbox(sarima_fit_obj.resid, lags=[10, 20], return_df=True)
+    print(f"    Ljung-Box Q(10)={lb.lb_stat.iloc[0]:.3f} p={lb.lb_pvalue.iloc[0]:.3f}  "
+          f"Q(20)={lb.lb_stat.iloc[1]:.3f} p={lb.lb_pvalue.iloc[1]:.3f}  "
+          f"({'white noise' if lb.lb_pvalue.iloc[0] > 0.05 else 'autocorrelation present'})")
+
     # Prophet
     prophet_model, prophet_pred_test = fit_prophet(train, len(test))
     with open(cfg.PROPHET_MODEL, 'wb') as f:
@@ -642,6 +696,11 @@ def main():
     with open(cfg.XGB_FORECAST, 'wb') as f:
         pickle.dump(xgb_model, f)
 
+    # Random Forest
+    rf_model, rf_pred_test = fit_rf(train_lag, test_lag, cfg.FEAT_COLS)
+    with open(cfg.RF_FORECAST, 'wb') as f:
+        pickle.dump(rf_model, f)
+
     # Evaluate
     y_true = test['y'].values
     def rmse(a, b):
@@ -654,6 +713,8 @@ def main():
                     'RMSE': float(rmse(y_true, prophet_pred_test))},
         'XGBoost': {'MAE': float(mean_absolute_error(y_true, xgb_pred_test)),
                     'RMSE': float(rmse(y_true, xgb_pred_test))},
+        'RF':      {'MAE': float(mean_absolute_error(y_true, rf_pred_test)),
+                    'RMSE': float(rmse(y_true, rf_pred_test))},
     }
     best_model = min(results, key=lambda m: results[m]['MAE'])
 
@@ -662,6 +723,7 @@ def main():
     forecast_test['sarima_pred']  = sarima_pred_test
     forecast_test['prophet_pred'] = prophet_pred_test
     forecast_test['xgb_pred']     = xgb_pred_test
+    forecast_test['rf_pred']      = rf_pred_test
     forecast_test.to_parquet(cfg.FORECAST_TEST, index=False)
 
     # Save forecast meta
@@ -706,7 +768,7 @@ def main():
   K-Means k={cfg.N_CLUSTERS}            : Silhouette={kmeans_meta['silhouette']:.3f}  DB={kmeans_meta['davies_bouldin']:.3f}
   CLV customers          : {clv_meta['n_customers']:,}  |  Median CLV: {clv_meta['clv_median']:,.0f} DZD
   SARIMA order           : {tuple(s_order)}{tuple(s_sorder)}
-  Forecast MAE           : SARIMA={results['SARIMA']['MAE']:,.0f}  Prophet={results['Prophet']['MAE']:,.0f}  XGBoost={results['XGBoost']['MAE']:,.0f}
+  Forecast MAE           : SARIMA={results['SARIMA']['MAE']:,.0f}  Prophet={results['Prophet']['MAE']:,.0f}  XGBoost={results['XGBoost']['MAE']:,.0f}  RF={results['RF']['MAE']:,.0f}
   Best model             : {best_model}
   Artifacts saved to     : ./artifacts/
   Elapsed time           : {elapsed:.0f}s
