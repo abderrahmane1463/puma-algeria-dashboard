@@ -948,7 +948,7 @@ def render_rfm(rfm):
         rfm_filtered[cols_to_show].sort_values('RFM_Score', ascending=False)
         .style
         .background_gradient(subset=['RFM_Score'], cmap='RdYlGn')
-        .applymap(_style_segment, subset=['Segment'])
+        .map(_style_segment, subset=['Segment'])
         .format({'Monetary': '{:,.0f}', 'Recency': '{:,.0f}'}),
         use_container_width=True,
         height=450
