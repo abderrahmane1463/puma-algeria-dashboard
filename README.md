@@ -9,7 +9,7 @@ An end-to-end customer analytics pipeline built on 300,761 sales transactions fr
 
 ## 📊 Live Demo
 
-[![Open in Streamlit](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)](https://puma-algeria-dashboard.streamlit.app)
+[![Open in Streamlit](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)](https://puma-algeria-dashboard-x8baybj2vopl6qfkejemue.streamlit.app/)
 
 > Upload your `VENTES PUMA 2025.xlsx` file to run the full pipeline. No data is stored.
 
