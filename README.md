@@ -1,69 +1,68 @@
-# 🐆 PUMA Algeria — AI-Driven Customer Intelligence Dashboard
+<h1 align="center">PUMA Algeria — Customer Intelligence Dashboard</h1>
 
-> Master's Thesis Project · ENSSEA 2025–2026  
-> SARL GREAT WAY · Statistics & Data Science
+<p align="center">
+  <em>AI-driven retail analytics: RFM segmentation, CLV modelling, and demand forecasting for PUMA Algeria's 13 boutiques</em>
+</p>
 
-An end-to-end customer analytics pipeline built on 300,761 sales transactions from PUMA Algeria's 13 boutiques. The dashboard covers customer segmentation, Customer Lifetime Value (CLV) estimation, and demand forecasting — all accessible through an interactive Streamlit interface.
+<p align="center">
+  <img src="https://img.shields.io/badge/Python-3.10+-3776AB?style=flat-square&logo=python&logoColor=white"/>
+  <img src="https://img.shields.io/badge/Streamlit-FF4B4B?style=flat-square&logo=streamlit&logoColor=white"/>
+  <img src="https://img.shields.io/badge/scikit--learn-F7931E?style=flat-square&logo=scikitlearn&logoColor=white"/>
+  <img src="https://img.shields.io/badge/XGBoost-189AB4?style=flat-square"/>
+  <img src="https://img.shields.io/badge/Plotly-3F4F75?style=flat-square&logo=plotly&logoColor=white"/>
+</p>
 
----
-
-## 📊 Live Demo
-
-[![Open in Streamlit](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)](https://puma-algeria-dashboard-x8baybj2vopl6qfkejemue.streamlit.app/)
-
-> Upload your `VENTES PUMA 2025.xlsx` file to run the full pipeline. No data is stored.
-
----
-
-## 🏗️ Pipeline Overview
-
-```
-Raw Excel (ERP export)
-        │
-        ▼
-┌─────────────────────┐
-│  Data Cleaning      │  333,843 rows → 300,761 net sales
-│  & Feature Eng.     │  35,696 identified customers
-└─────────┬───────────┘
-          │
-    ┌─────┴──────┬──────────────┐
-    ▼            ▼              ▼
-┌────────┐  ┌────────┐   ┌──────────────┐
-│  RFM   │  │  CLV   │   │  Forecasting │
-│Scoring │  │Modelling│  │  4 Models    │
-└────────┘  └────────┘   └──────────────┘
-    │            │              │
-    ▼            ▼              ▼
-K-Means     BG/NBD +       SARIMA (best)
-Clustering  Gamma-Gamma    Prophet
-(k=4)       (12-month CLV) XGBoost
-                           Random Forest
-                    │
-                    ▼
-         ┌──────────────────┐
-         │  Streamlit       │
-         │  Dashboard (7    │
-         │  interactive     │
-         │  tabs)           │
-         └──────────────────┘
-```
+<p align="center">
+  <a href="https://puma-algeria-dashboard-x8baybj2vopl6qfkejemue.streamlit.app/">
+    <img src="https://static.streamlit.io/badges/streamlit_badge_black_white.svg" alt="Open in Streamlit"/>
+  </a>
+</p>
 
 ---
 
-## 📈 Key Results
+## Overview
+
+An end-to-end customer analytics pipeline built on 300,761 sales transactions from PUMA Algeria's 13 boutiques. The system automates customer segmentation using RFM scoring and K-Means clustering, estimates 12-month Customer Lifetime Value via BG/NBD + Gamma-Gamma models, and forecasts daily revenue with a SARIMA/Prophet/XGBoost ensemble — all served through a 7-tab interactive Streamlit dashboard.
+
+This project was developed as a Master's thesis at ENSSEA (École Nationale Supérieure de Statistique et d'Économie Appliquée) in collaboration with SARL GREAT WAY.
+
+## Features
+
+- RFM scoring with threshold grid calibrated to the Algerian retail calendar
+- K-Means clustering (k=4) identifying Champions, Promising, At-Risk, and Dormant segments
+- BG/NBD + Gamma-Gamma 12-month CLV modelling (discounted at 12% annually)
+- Demand forecasting ensemble: SARIMA · Prophet · XGBoost · Random Forest
+- Individual customer lookup — RFM score, segment, CLV, and churn probability
+- 7-tab Streamlit dashboard: EDA · RFM · K-Means · CLV · Forecasting · Clients · Documentation
+- Upload mode for Streamlit Cloud — pipeline runs in-browser, no local setup needed
+
+## Tech Stack
+
+| Category | Tools |
+|----------|-------|
+| Language | Python 3.10+ |
+| Dashboard | Streamlit |
+| Segmentation | scikit-learn (K-Means) |
+| CLV Modelling | lifetimes (BG/NBD, Gamma-Gamma) |
+| Time-series | pmdarima, statsmodels (SARIMA) |
+| ML Forecasting | XGBoost, scikit-learn (Random Forest) |
+| Additive Decomposition | Prophet |
+| Visualisation | Plotly |
+| Data Engineering | pandas, numpy |
+
+## Key Results
 
 | Metric | Value |
 |--------|-------|
 | Dataset | 300,761 transactions · 35,696 customers · 363 trading days |
-| K-Means Silhouette Score | **0.399** |
-| K-Means Davies-Bouldin Index | **0.955** |
-| BG/NBD Holdout MAE | **0.202 transactions/customer** |
-| Champions median CLV | **38,554 DZD** |
-| Dormant median CLV | **1,554 DZD** (24.8× ratio, p < 0.0001) |
-| Best forecast model | **SARIMA(2,1,2)(1,0,1)₇** |
-| SARIMA 60-day MAE | **792,505 DZD** (18.6% of mean daily revenue) |
+| K-Means Silhouette Score | 0.399 |
+| BG/NBD Holdout MAE | 0.202 transactions/customer |
+| Champions median CLV | 38,554 DZD |
+| Dormant median CLV | 1,554 DZD (24.8× lower, p < 0.0001) |
+| Best forecast model | SARIMA(2,1,2)(1,0,1)₇ |
+| SARIMA 60-day MAE | 792,505 DZD (18.6% of mean daily revenue) |
 
-### Customer Segments (K-Means, k=4)
+### Customer Segments
 
 | Segment | Count | Share |
 |---------|-------|-------|
@@ -72,117 +71,35 @@ Clustering  Gamma-Gamma    Prophet
 | At Risk | 8,601 | 24.1% |
 | Dormant | 19,587 | 54.9% |
 
----
-
-## 🖥️ Dashboard Tabs
-
-| Tab | Content |
-|-----|---------|
-| **EDA** | Revenue by store, category, day-of-week, month; downloadable tables |
-| **RFM** | Individual RFM scores and quintile breakdown; segment filter and export |
-| **K-Means** | Cluster explorer with profile charts and segment distribution |
-| **CLV** | CLV scores, P(alive) heatmap, tier breakdown, top-100 VIP list |
-| **Forecasting** | 30/60/90-day SARIMA projections with scenario planning bands |
-| **Clients** | Individual customer lookup — RFM + segment + CLV + churn probability |
-| **Documentation** | Pipeline overview, data dictionary, model parameters, live KPIs |
-
----
-
-## 🚀 Running Locally
-
-### 1. Clone the repo
+## Getting Started
 
 ```bash
 git clone https://github.com/abderrahmane1463/puma-algeria-dashboard.git
 cd puma-algeria-dashboard
-```
-
-### 2. Install dependencies
-
-```bash
 pip install -r requirements.txt
-```
-
-### 3. Add your data file
-
-Place `VENTES PUMA 2025.xlsx` in the project root (it is git-ignored and will never be pushed).
-
-### 4. Train the models (once)
-
-```bash
-python train_models.py
-```
-
-This runs the full pipeline and saves all artifacts to `artifacts/`. Takes ~5–10 minutes.
-
-### 5. Launch the dashboard
-
-```bash
+# Place VENTES PUMA 2025.xlsx in the project root (git-ignored)
+python train_models.py        # Run once — saves artifacts (~5-10 min)
 streamlit run app.py
 ```
 
-> **Streamlit Cloud users:** Skip steps 3–4. Just upload your Excel file directly in the dashboard — the pipeline runs automatically in the browser session.
+> **Streamlit Cloud users:** Upload the Excel file directly in the dashboard — the pipeline runs automatically in the browser session.
 
----
-
-## 📁 Project Structure
+## Project Structure
 
 ```
 puma-algeria-dashboard/
-│
 ├── app.py              # Streamlit dashboard (7 tabs)
 ├── pipeline.py         # In-memory pipeline (used by upload mode)
 ├── train_models.py     # Local training script → saves to artifacts/
 ├── config.py           # All parameters in one place
-│
-├── requirements.txt    # Python dependencies
+├── requirements.txt
 ├── packages.txt        # System dependencies (libgomp1 for XGBoost)
-├── .streamlit/
-│   └── config.toml     # Upload size limit + dark theme
-│
-├── artifacts/          # ← git-ignored (generated by train_models.py)
-│   ├── data/           #   Parquet files + JSON metadata
-│   └── models/         #   Serialized model objects
-│
-└── VENTES PUMA 2025.xlsx  # ← git-ignored (your private data)
+├── artifacts/          # Generated by train_models.py (git-ignored)
+│   ├── data/           # Parquet files + JSON metadata
+│   └── models/         # Serialized model objects
+└── VENTES PUMA 2025.xlsx  # Private data file (git-ignored)
 ```
 
 ---
 
-## 🔬 Methods
-
-### Customer Segmentation
-- **RFM Scoring** — Recency/Frequency/Monetary with absolute threshold grid calibrated to the Algerian retail calendar
-- **K-Means Clustering** — Log-normalised + StandardScaler features; k selected via elbow + silhouette joint criterion
-
-### Customer Lifetime Value
-- **BG/NBD Model** — Beta-Geometric/Negative Binomial Distribution for purchase frequency and churn
-- **Gamma-Gamma Model** — Spend heterogeneity model for monetary value
-- **12-month CLV** — Net Present Value discounted at 12% annually (weekly cadence)
-
-### Demand Forecasting
-- **SARIMA(2,1,2)(1,0,1)₇** — Explicit weekly seasonal structure; selected via `auto_arima` (AIC)
-- **Prophet** — Meta's additive decomposition model
-- **XGBoost** — Gradient-boosted trees with 8 lag/calendar features (recursive)
-- **Random Forest** — 300-tree ensemble with same feature matrix (recursive)
-
----
-
-## 🛠️ Tech Stack
-
-| Layer | Library |
-|-------|---------|
-| Data engineering | pandas, numpy |
-| Segmentation | scikit-learn |
-| CLV modelling | lifetimes |
-| Time-series | pmdarima, statsmodels |
-| ML forecasting | xgboost, scikit-learn |
-| Additive decomposition | prophet |
-| Visualisation | plotly |
-| Dashboard | streamlit |
-
----
-
-## 📄 License
-
-This project was developed as part of a Master's thesis at ENSSEA (École Nationale Supérieure de Statistique et d'Économie Appliquée), Algeria. All rights reserved.
+<p align="center">Made by <a href="https://github.com/abderrahmane1463">Cherfaoui Houssam Abderrahmane</a></p>
