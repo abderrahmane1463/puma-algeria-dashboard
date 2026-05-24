@@ -1301,15 +1301,7 @@ def render_clv(clv, meta, val_df, sales, bgf):
 
     st.markdown("<div class='section-header'></div>", unsafe_allow_html=True)
     st.markdown("### Actionable Customer Target List")
-    st.markdown("""
-        Use this searchable list to identify specific customers for retention. 
-        **Strategy:** Filter for **High CLV** and **Churned / Lost** risk to target VIPs.
-    """)
-    # Column-specific filters
-    tier_list = sorted(clv['CLV_Tier'].dropna().unique().tolist())
-    sel_tiers = st.multiselect("Filter by Tier", options=tier_list, default=tier_list)
-
-    target_list = clv[clv['CLV_Tier'].isin(sel_tiers)].copy()
+    target_list = clv.copy()
 
     display_cols = ['Client', 'CLV', 'P_Alive', 'pred_num_txn', 'pred_txn_value']
     st.dataframe(
