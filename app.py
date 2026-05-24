@@ -1260,7 +1260,7 @@ def render_clv(clv, meta, val_df, sales, bgf):
 
     # ── Scientific Diagnostic Row ────────────────────────────────────────────
     st.markdown("<div class='section-header'>Scientific Validation & Diagnostic Analytics</div>", unsafe_allow_html=True)
-    v1, v2, v3 = st.columns(3)
+    v1, v3 = st.columns(2)
     
     with v1:
         # Expected vs Actual (90-Day Holdout)
@@ -1282,32 +1282,6 @@ def render_clv(clv, meta, val_df, sales, bgf):
             )
             fig_val.update_layout(legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1))
             st.plotly_chart(fig_val, use_container_width=True)
-
-    with v2:
-        # P_Alive Heatmap (The 'Retention Grid')
-        # Create a grid of Recency (0-52) and Frequency (0-20)
-        max_f, max_r = 15, 52
-        fs = np.arange(0, max_f + 1)
-        rs = np.arange(0, max_r + 1)
-        # T is the age of the customer (we'll assume 52 weeks)
-        z = np.zeros((len(fs), len(rs)))
-        for i, f in enumerate(fs):
-            for j, r in enumerate(rs):
-                p_alive = bgf.conditional_probability_alive(f, r, 52)
-                # The lifetimes model returns a 1D numpy array or pandas Series here
-                z[i, j] = p_alive[0] if hasattr(p_alive, '__iter__') else float(p_alive)
-        
-        fig_hm = go.Figure(data=go.Heatmap(
-            z=z, x=rs, y=fs,
-            colorscale=[[0, '#1A1A1A'], [0.5, '#660000'], [1, '#FF0000']],
-            colorbar=dict(title='P(Alive)'),
-            hovertemplate='Recency: %{x}w<br>Frequency: %{y}<br>Prob Alive: %{z:.1%}<extra></extra>'
-        ))
-        fig_hm.update_layout(
-            **puma_theme("Retention Logic: Prob. of Being Alive", height=280),
-            xaxis_title="Recency (Weeks)", yaxis_title="Frequency"
-        )
-        st.plotly_chart(fig_hm, use_container_width=True)
 
     with v3:
         # Cumulative Lift Curve
