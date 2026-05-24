@@ -1306,27 +1306,20 @@ def render_clv(clv, meta, val_df, sales, bgf):
         **Strategy:** Filter for **High CLV** and **Churned / Lost** risk to target VIPs.
     """)
     # Column-specific filters
-    f1, f2 = st.columns(2)
     tier_list = sorted(clv['CLV_Tier'].dropna().unique().tolist())
-    risk_list = sorted(clv['Churn_Risk'].dropna().unique().tolist())
-    
-    sel_tiers = f1.multiselect("Filter by Tier", options=tier_list, default=tier_list)
-    sel_risks = f2.multiselect("Filter by Risk Level", options=risk_list, default=risk_list)
-    
-    target_list = clv[
-        (clv['CLV_Tier'].isin(sel_tiers)) &
-        (clv['Churn_Risk'].isin(sel_risks))
-    ].copy()
+    sel_tiers = st.multiselect("Filter by Tier", options=tier_list, default=tier_list)
 
-    display_cols = ['Client', 'CLV', 'CLV_Tier', 'P_Alive', 'Churn_Risk', 'pred_num_txn']
+    target_list = clv[clv['CLV_Tier'].isin(sel_tiers)].copy()
+
+    display_cols = ['Client', 'CLV', 'P_Alive', 'pred_num_txn', 'pred_txn_value']
     st.dataframe(
         target_list[display_cols].sort_values('CLV', ascending=False),
         column_config={
             "Client": "Customer ID",
             "CLV": st.column_config.NumberColumn("12M Predicted CLV", format="%d DZD"),
             "P_Alive": st.column_config.ProgressColumn("Vitality (P-Alive)", min_value=0, max_value=1),
-            "Churn_Risk": "Risk Level",
-            "pred_num_txn": "Expected Txns (12M)"
+            "pred_num_txn": st.column_config.NumberColumn("Expected Txns (12M)", format="%.4f"),
+            "pred_txn_value": st.column_config.NumberColumn("Avg Spend / Transaction (DZD)", format="%d DZD"),
         },
         use_container_width=True,
         hide_index=True
